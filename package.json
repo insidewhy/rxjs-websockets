@@ -1,8 +1,9 @@
 {
   "name": "angular2-websocket-service",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "websocket rxjs streams provided by an injectable angular 2 service",
   "main": "lib/index.service.js",
+  "typings": "lib/index.service",
   "scripts": {
     "build": "tsc -p src",
     "watch": "tsc -w -p src"
