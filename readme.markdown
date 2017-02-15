@@ -57,6 +57,10 @@ export class ServerSocket {
       this.inputStream = new QueueingSubject<any>()
     )
 
+    // this observable has had `.share()` called on it so multiple consumers
+    // can use it. At most one WebSocket connection will be created and
+    // shared between all users when the observer count rises above 0,
+    // when the observer count then falls to 0 the connection will be closed.
     return this.outputStream
   }
 
