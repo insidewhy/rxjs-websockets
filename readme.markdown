@@ -52,20 +52,13 @@ export class ServerSocket {
     if (this.outputStream)
       return this.outputStream
 
-    // Using share causes a single websocket to be created when
-    // the first observer subscribes and then shares that websocket
-    // with future subscribers, closing it when the number of observers
-    // drops to zero.
-    this.outputStream = this.socketFactory.connect(
+    // Using share() causes a single websocket to be created when the first
+    // observer subscribes. This socket is shared with subsequent observers
+    // and closed when the observer count falls to zero.
+    return this.outputStream = this.socketFactory.connect(
       'ws://127.0.0.1:4201/ws',
       this.inputStream = new QueueingSubject<any>()
     ).share()
-
-    // this observable has had `.share()` called on it so multiple consumers
-    // can use it. At most one WebSocket connection will be created and
-    // shared between all users when the observer count rises above 0,
-    // when the observer count then falls to 0 the connection will be closed.
-    return this.outputStream
   }
 
   public send(message: any):void {
