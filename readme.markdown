@@ -12,11 +12,9 @@ npm install -S rxjs-websockets
 npm install -S queueing-subject
 ```
 
-Import the service in your `app.module.ts` or equivalent:
-
 ## How to use with angular 2
 
-You can write your own service to provide a websocket using this factory as follows:
+You can write your own service to provide a websocket using this library as follows:
 
 ```javascript
 // file: server-socket.service.ts
