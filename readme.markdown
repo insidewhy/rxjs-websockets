@@ -52,10 +52,14 @@ export class ServerSocket {
     if (this.outputStream)
       return this.outputStream
 
+    // Using share causes a single websocket to be created when
+    // the first observer subscribes and then shares that websocket
+    // with future subscribers, closing it when the number of observers
+    // drops to zero.
     this.outputStream = this.socketFactory.connect(
       'ws://127.0.0.1:4201/ws',
       this.inputStream = new QueueingSubject<any>()
-    )
+    ).share()
 
     // this observable has had `.share()` called on it so multiple consumers
     // can use it. At most one WebSocket connection will be created and
@@ -102,7 +106,6 @@ export class SocketUserComponent {
   }
 
   ngOnDestroy() {
-    // the websocket is closed when the number of subscribers drops to zero
     this.socketSubscription.unsubscribe()
   }
 }

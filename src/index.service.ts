@@ -43,6 +43,5 @@ export class WebSocketService {
         socket = null
       }
     })
-    .share()
   }
 }
