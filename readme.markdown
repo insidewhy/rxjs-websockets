@@ -1,4 +1,4 @@
-# angular2-websocket-service
+# rxjs-websockets
 
 An rxjs stream based websocket factory service, ideal for use with angular 2.
 
@@ -7,7 +7,7 @@ An rxjs stream based websocket factory service, ideal for use with angular 2.
 Install the dependency:
 
 ```bash
-npm install -S angular2-websocket-service
+npm install -S rxjs-websockets
 # the following dependency is recommended for most users
 npm install -S queueing-subject
 ```
@@ -16,22 +16,6 @@ Import the service in your `app.module.ts` or equivalent:
 
 ## How to use with angular 2
 
-```javascript
-import { WebSocketService } from 'angular2-websocket-service'
-```
-
-Add the service to your module's providers list:
-
-```javascript
-@NgModule({
-  imports: [ /* ... */ ],
-  declarations: [ /* ... */ ],
-  providers: [ WebSocketService ],
-  bootstrap: [ /* ... */ ],
-})
-export class AppModule {}
-```
-
 You can write your own service to provide a websocket using this factory as follows:
 
 ```javascript
@@ -39,14 +23,12 @@ You can write your own service to provide a websocket using this factory as foll
 import { Injectable } from '@angular/core'
 import { QueueingSubject } from 'queueing-subject'
 import { Observable } from 'rxjs/Observable'
-import { WebSocketService } from 'angular2-websocket-service'
+import websocketConnect from 'rxjs-websockets'
 
 @Injectable()
 export class ServerSocket {
   private inputStream: QueueingSubject<any>
   public outputStream: Observable<any>
-
-  constructor(private socketFactory: WebSocketService) {}
 
   public connect() {
     if (this.outputStream)
@@ -55,7 +37,7 @@ export class ServerSocket {
     // Using share() causes a single websocket to be created when the first
     // observer subscribes. This socket is shared with subsequent observers
     // and closed when the observer count falls to zero.
-    return this.outputStream = this.socketFactory.connect(
+    return this.outputStream = websocketConnect(
       'ws://127.0.0.1:4201/ws',
       this.inputStream = new QueueingSubject<any>()
     ).share()

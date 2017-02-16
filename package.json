@@ -1,12 +1,12 @@
 {
-  "name": "angular2-websocket-service",
-  "version": "0.5.3",
-  "description": "websocket rxjs streams provided by an injectable angular 2 service",
+  "name": "rxjs-websockets",
+  "version": "0.6.0",
+  "description": "rxjs 5 websockets library, ideal for use with angular 2",
   "main": "lib/index.service.js",
   "typings": "lib/index.service",
   "repository": {
     "type": "git",
-    "url": "git://github.com/ohjames/angular2-websocket-service.git"
+    "url": "git://github.com/ohjames/rxjs-websockets.git"
   },
   "keywords": [
     "angular2",
