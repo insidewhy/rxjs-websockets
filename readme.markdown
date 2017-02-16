@@ -78,6 +78,7 @@ This service could be used like this:
 
 ```javascript
 import { Component } from '@angular/core'
+import { Subscription } from 'rxjs/Subscription'
 import { ServerSocket } from './server-socket.service'
 
 @Component({
@@ -86,16 +87,23 @@ import { ServerSocket } from './server-socket.service'
   styleUrls: ['./socket-user.component.scss']
 })
 export class SocketUserComponent {
+  private socketSubscription: Subscription
+
   constructor(private socket: ServerSocket) {
     const stream = this.socket.connect()
 
-    stream.subscribe(message:any => {
+    this.socketSubscription = stream.subscribe(message:any => {
       console.log('received message from server: ', message)
     })
 
     // send message to server, if the socket is not connected it will be sent
     // as soon as the connection becomes available thanks to QueueingSubject
     this.socket.send({ type: 'helloServer' })
+  }
+
+  ngOnDestroy() {
+    // the websocket is closed when the number of subscribers drops to zero
+    this.socketSubscription.unsubscribe()
   }
 }
 ```
