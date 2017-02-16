@@ -1,11 +1,11 @@
 # rxjs-websockets
 
-An rxjs stream based websocket factory service, ideal for use with angular 2.
+An rxjs websocket library with a simple implementation built with flexibility in mind. Great for use with angular 2 or any other rxjs project.
 
 ## Comparisons to other rxjs websocket libraries:
 
- * [observable socket](https://github.com/killtheliterate/observable-socket): this library takes the input observable as a parameter allowing the library user to choose the appropriate `Subject` for their needs. [queueing-subject](https://github.com/ohjames/queueing-subject) can be used to achieve the same semantics using rxjs-websockets.
- * [rxjs builting websocket subject](https://github.com/ReactiveX/rxjs/blob/next/src/observable/dom/webSocket.ts): Implemented as a Subject so lacks the flexibility that rxjs-websockets provides.
+ * [observable socket](https://github.com/killtheliterate/observable-socket) provides the input stream for the user, in rxjs-websockets the input stream is taken as a parameter allowing the user to choose the appropriate subject or observable for their needs. [queueing-subject](https://github.com/ohjames/queueing-subject) can be used to achieve the same semantics as observable-socket.
+ * [rxjs builting websocket subject](https://github.com/ReactiveX/rxjs/blob/next/src/observable/dom/webSocket.ts): Implemented as a Subject so lacks the flexibility that rxjs-websockets and observable-socket provide.
 
 ## How to install (with webpack/angular-cli)
 
@@ -27,8 +27,10 @@ import websocketConnect from 'rxjs-websockets'
 const input = new QueueingSubject<any>()
 const output = websocketConnect('ws://localhost/websocket-path', input)
 
+// this value will be stringified before being sent to the server
 input.next({ whateverField: 'some data' })
 output.subscribe(value => {
+  // value is the message from the server parsed with JSON.parse(...)
   console.log('received message', JSON.stringify(value))
 })
 ```
