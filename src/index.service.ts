@@ -1,11 +1,8 @@
-import { Injectable } from '@angular/core'
 import { Observable } from 'rxjs/Observable'
 import { Subscription } from 'rxjs/Subscription'
 
-@Injectable()
 export class WebSocketService {
   connect(url: string, input: Observable<any>): Observable<any> {
-
     return new Observable<any>(observer => {
       const socket = new WebSocket(url)
       let inputSubscription: Subscription

@@ -1,6 +1,6 @@
 {
   "name": "angular2-websocket-service",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "websocket rxjs streams provided by an injectable angular 2 service",
   "main": "lib/index.service.js",
   "typings": "lib/index.service",
@@ -20,9 +20,7 @@
   "author": "James Pike <github@chilon.net>",
   "license": "ISC",
   "dependencies": {
-    "@angular/core": "^2.4.5",
-    "rxjs": "^5.0.1",
-    "zone.js": "^0.7.2"
+    "rxjs": "^5.0.1"
   },
   "devDependencies": {
     "typescript": "^2.1.6"

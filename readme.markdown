@@ -1,8 +1,8 @@
 # angular2-websocket-service
 
-An rxjs stream based websocket factory service for angular 2.
+An rxjs stream based websocket factory service, ideal for use with angular 2.
 
-## How to install this dependency (with webpack/angular-cli)
+## How to install (with webpack/angular-cli)
 
 Install the dependency:
 
@@ -13,6 +13,8 @@ npm install -S queueing-subject
 ```
 
 Import the service in your `app.module.ts` or equivalent:
+
+## How to use with angular 2
 
 ```javascript
 import { WebSocketService } from 'angular2-websocket-service'
@@ -29,8 +31,6 @@ Add the service to your module's providers list:
 })
 export class AppModule {}
 ```
-
-## How to use the service
 
 You can write your own service to provide a websocket using this factory as follows:
 
