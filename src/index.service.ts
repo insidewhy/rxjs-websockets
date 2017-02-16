@@ -2,16 +2,13 @@ import { Injectable } from '@angular/core'
 import { Observable } from 'rxjs/Observable'
 import { Subscription } from 'rxjs/Subscription'
 
-import 'rxjs/add/operator/finally'
-
 @Injectable()
 export class WebSocketService {
   connect(url: string, input: Observable<any>): Observable<any> {
-    let socket: WebSocket
-    let inputSubscription: Subscription
 
     return new Observable<any>(observer => {
-      socket = new WebSocket(url)
+      const socket = new WebSocket(url)
+      let inputSubscription: Subscription
 
       socket.onopen = () => {
         inputSubscription = input.subscribe(data => {
@@ -30,16 +27,13 @@ export class WebSocketService {
       socket.onclose = () => {
         observer.complete()
       }
-    })
-    .finally(() => {
-      if (inputSubscription) {
-        inputSubscription.unsubscribe()
-        inputSubscription = null
-      }
 
-      if (socket) {
-        socket.close()
-        socket = null
+      return () => {
+        if (inputSubscription)
+          inputSubscription.unsubscribe()
+
+        if (socket)
+          socket.close()
       }
     })
   }
