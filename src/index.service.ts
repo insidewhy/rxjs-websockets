@@ -3,20 +3,16 @@ import { Observable } from 'rxjs/Observable'
 import { Subscription } from 'rxjs/Subscription'
 
 import 'rxjs/add/operator/share'
+import 'rxjs/add/operator/finally'
 
 @Injectable()
 export class WebSocketService {
   connect(url: string, input: Observable<any>): Observable<any> {
-    return new Observable<any>(observer => {
-      let inputSubscription: Subscription
-      const socket = new WebSocket(url)
+    let socket: WebSocket
+    let inputSubscription: Subscription
 
-      const shutdown = () => {
-        if (inputSubscription) {
-          inputSubscription.unsubscribe()
-          inputSubscription = null
-        }
-      }
+    return new Observable<any>(observer => {
+      socket = new WebSocket(url)
 
       socket.onopen = () => {
         inputSubscription = input.subscribe(data => {
@@ -29,14 +25,24 @@ export class WebSocketService {
       }
 
       socket.onerror = error => {
-        shutdown()
         observer.error(error)
       }
 
       socket.onclose = () => {
-        shutdown()
         observer.complete()
       }
-    }).share()
+    })
+    .finally(() => {
+      if (inputSubscription) {
+        inputSubscription.unsubscribe()
+        inputSubscription = null
+      }
+
+      if (socket) {
+        socket.close()
+        socket = null
+      }
+    })
+    .share()
   }
 }
