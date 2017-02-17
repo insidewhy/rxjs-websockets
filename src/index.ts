@@ -8,14 +8,24 @@ export interface Connection {
 }
 
 export default function connect(url: string, input: Observable<any>): Connection {
-  const connectionStatus = new BehaviorSubject(false)
+  const connectionStatus = new BehaviorSubject<number>(0)
 
   const messages = new Observable<any>(observer => {
     const socket = new WebSocket(url)
     let inputSubscription: Subscription
 
+    let open = false
+    const closed = () => {
+      if (! open)
+        return
+
+      connectionStatus.next(connectionStatus.getValue() - 1)
+      open = false
+    }
+
     socket.onopen = () => {
-      connectionStatus.next(true)
+      open = true
+      connectionStatus.next(connectionStatus.getValue() + 1)
       inputSubscription = input.subscribe(data => {
         socket.send(JSON.stringify(data))
       })
@@ -26,12 +36,12 @@ export default function connect(url: string, input: Observable<any>): Connection
     }
 
     socket.onerror = error => {
-      connectionStatus.next(false)
+      closed()
       observer.error(error)
     }
 
     socket.onclose = () => {
-      connectionStatus.next(false)
+      closed()
       observer.complete()
     }
 
@@ -40,7 +50,7 @@ export default function connect(url: string, input: Observable<any>): Connection
         inputSubscription.unsubscribe()
 
       if (socket) {
-        connectionStatus.next(false)
+        closed()
         socket.close()
       }
     }

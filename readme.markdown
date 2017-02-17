@@ -34,8 +34,8 @@ input.next({ whateverField: 'some data' })
 
 // the connectionStatus stream will provides the current connection status
 // immediately to each new observer
-const connectionStatusSubscription = connectionStatus.subscribe(connected => {
-  console.log('connection status:', connected ? 'connected' : 'disconnected')
+const connectionStatusSubscription = connectionStatus.subscribe(numberConnected => {
+  console.log('number of connected websockets:', numberConnected)
 })
 
 const messagesSubscription = messages.subscribe(message => {
