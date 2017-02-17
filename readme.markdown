@@ -34,14 +34,21 @@ input.next({ whateverField: 'some data' })
 
 // the connectionStatus stream will provides the current connection status
 // immediately to each new observer
-connectionStatus.subscribe(connected => {
+const connectionStatusSubscription = connectionStatus.subscribe(connected => {
   console.log('connection status:', connected ? 'connected' : 'disconnected')
 })
 
-messages.subscribe(message => {
+const messagesSubscription = messages.subscribe(message => {
   // message is the message from the server parsed with JSON.parse(...)
   console.log('received message:', JSON.stringify(message))
 })
+
+// this will close the websocket
+messagesSubscription.unsubscribe()
+
+// closing the websocket does not close the connection status observable, it
+// can be used to monitor future connection status changes
+connectionStatusSubscription.unsubscribe()
 ```
 
 ## How to use with angular 2
