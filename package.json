@@ -2,8 +2,8 @@
   "name": "rxjs-websockets",
   "version": "0.7.0",
   "description": "rxjs 5 websockets library, ideal for use with angular 2",
-  "main": "lib/index.service.js",
-  "typings": "lib/index.service",
+  "main": "lib/index.js",
+  "typings": "lib/index",
   "repository": {
     "type": "git",
     "url": "git://github.com/ohjames/rxjs-websockets.git"
