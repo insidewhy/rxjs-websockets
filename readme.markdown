@@ -25,13 +25,20 @@ import websocketConnect from 'rxjs-websockets'
 
 // this subject queues as necessary to ensure every message is delivered
 const input = new QueueingSubject()
-const output = websocketConnect('ws://localhost/websocket-path', input)
+
+// this method returns an object which contains two observables
+const {messages, connectionStatus} = websocketConnect('ws://localhost/websocket-path', input)
 
 // this value will be stringified before being sent to the server
 input.next({ whateverField: 'some data' })
-output.subscribe(value => {
-  // value is the message from the server parsed with JSON.parse(...)
-  console.log('received message', JSON.stringify(value))
+
+connectionStatus.subscribe(connected => {
+  console.log('connection status:', connected ? 'connected' : 'disconnected')
+})
+
+messages.subscribe(message => {
+  // message is the message from the server parsed with JSON.parse(...)
+  console.log('received message:', JSON.stringify(message))
 })
 ```
 
@@ -49,19 +56,19 @@ import websocketConnect from 'rxjs-websockets'
 @Injectable()
 export class ServerSocket {
   private inputStream: QueueingSubject<any>
-  public outputStream: Observable<any>
+  public messages: Observable<any>
 
   public connect() {
-    if (this.outputStream)
-      return this.outputStream
+    if (this.messages)
+      return
 
     // Using share() causes a single websocket to be created when the first
     // observer subscribes. This socket is shared with subsequent observers
     // and closed when the observer count falls to zero.
-    return this.outputStream = websocketConnect(
+    this.messages = websocketConnect(
       'ws://127.0.0.1:4201/ws',
       this.inputStream = new QueueingSubject<any>()
-    ).share()
+    ).messages.share()
   }
 
   public send(message: any):void {
@@ -89,10 +96,12 @@ import { ServerSocket } from './server-socket.service'
 export class SocketUserComponent {
   private socketSubscription: Subscription
 
-  constructor(private socket: ServerSocket) {
-    const stream = this.socket.connect()
+  constructor(private socket: ServerSocket) {}
 
-    this.socketSubscription = stream.subscribe(message:any => {
+  ngOnInit() {
+    this.socket.connect()
+
+    this.socketSubscription = this.socket.messages.subscribe(message:any => {
       console.log('received message from server: ', message)
     })
 
