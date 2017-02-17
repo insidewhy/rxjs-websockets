@@ -4,8 +4,8 @@ An rxjs websocket library with a simple implementation built with flexibility in
 
 ## Comparisons to other rxjs websocket libraries:
 
- * [observable socket](https://github.com/killtheliterate/observable-socket) provides the input stream for the user, in rxjs-websockets the input stream is taken as a parameter allowing the user to choose the appropriate subject or observable for their needs. [queueing-subject](https://github.com/ohjames/queueing-subject) can be used to achieve the same semantics as observable-socket.
- * [rxjs builting websocket subject](https://github.com/ReactiveX/rxjs/blob/next/src/observable/dom/webSocket.ts): Implemented as a Subject so lacks the flexibility that rxjs-websockets and observable-socket provide.
+ * [observable-socket](https://github.com/killtheliterate/observable-socket) provides the input stream for the user, in rxjs-websockets the input stream is taken as a parameter allowing the user to choose the appropriate subject or observable for their needs. [queueing-subject](https://github.com/ohjames/queueing-subject) can be used to achieve the same semantics as observable-socket. rxjs exposes the websocket connection status as an observable, with observable-socket the WebSocket object must be used directly to listen for connection status changes.
+ * [rxjs builting websocket subject](https://github.com/ReactiveX/rxjs/blob/next/src/observable/dom/webSocket.ts): Implemented as a Subject so lacks the flexibility that rxjs-websockets and observable-socket provide. It does not provide any ability to monitor the web socket connection state.
 
 ## How to install (with webpack/angular-cli)
 
@@ -32,6 +32,8 @@ const {messages, connectionStatus} = websocketConnect('ws://localhost/websocket-
 // this value will be stringified before being sent to the server
 input.next({ whateverField: 'some data' })
 
+// the connectionStatus stream will provides the current connection status
+// immediately to each new observer
 connectionStatus.subscribe(connected => {
   console.log('connection status:', connected ? 'connected' : 'disconnected')
 })
