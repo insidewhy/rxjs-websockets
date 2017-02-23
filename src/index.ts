@@ -40,9 +40,12 @@ export default function connect(url: string, input: Observable<any>): Connection
       observer.error(error)
     }
 
-    socket.onclose = () => {
+    socket.onclose = (event: CloseEvent) => {
       closed()
-      observer.complete()
+      if (event.wasClean)
+        observer.complete()
+      else
+        observer.error(new Error(event.reason))
     }
 
     return () => {
