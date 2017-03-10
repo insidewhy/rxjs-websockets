@@ -4,8 +4,8 @@ An rxjs websocket library with a simple implementation built with flexibility in
 
 ## Comparisons to other rxjs websocket libraries:
 
- * [observable-socket](https://github.com/killtheliterate/observable-socket) provides the input stream for the user, in rxjs-websockets the input stream is taken as a parameter allowing the user to choose the appropriate subject or observable for their needs. [queueing-subject](https://github.com/ohjames/queueing-subject) can be used to achieve the same semantics as observable-socket. rxjs exposes the websocket connection status as an observable, with observable-socket the WebSocket object must be used directly to listen for connection status changes.
- * [rxjs builting websocket subject](https://github.com/ReactiveX/rxjs/blob/next/src/observable/dom/webSocket.ts): Implemented as a Subject so lacks the flexibility that rxjs-websockets and observable-socket provide. It does not provide any ability to monitor the web socket connection state.
+ * [observable-socket](https://github.com/killtheliterate/observable-socket) provides the input stream for the user, in rxjs-websockets the input stream is taken as a parameter allowing the user to choose the appropriate subject or observable for their needs. [queueing-subject](https://github.com/ohjames/queueing-subject) can be used to achieve the same semantics as observable-socket. rxjs-websockets exposes the websocket connection status as an observable, with observable-socket the WebSocket object must be used directly to listen for connection status changes.
+ * [rxjs built-in websocket subject](https://github.com/ReactiveX/rxjs/blob/next/src/observable/dom/webSocket.ts): Implemented as a Subject so lacks the flexibility that rxjs-websockets and observable-socket provide. It does not provide any ability to monitor the web socket connection state.
 
 ## How to install (with webpack/angular-cli)
 
@@ -27,17 +27,19 @@ import websocketConnect from 'rxjs-websockets'
 const input = new QueueingSubject()
 
 // this method returns an object which contains two observables
-const {messages, connectionStatus} = websocketConnect('ws://localhost/websocket-path', input)
+const { messages, connectionStatus } = websocketConnect('ws://localhost/websocket-path', input)
 
 // this value will be stringified before being sent to the server
 input.next({ whateverField: 'some data' })
 
-// the connectionStatus stream will provides the current connection status
-// immediately to each new observer
+// the connectionStatus stream will provides the current number of websocket
+// connections immediately to each new observer and updates as it changes
 const connectionStatusSubscription = connectionStatus.subscribe(numberConnected => {
   console.log('number of connected websockets:', numberConnected)
 })
 
+// the websocket connection is created lazily when the messages observable is
+// subscribed to
 const messagesSubscription = messages.subscribe(message => {
   // message is the message from the server parsed with JSON.parse(...)
   console.log('received message:', JSON.stringify(message))
@@ -123,4 +125,18 @@ export class SocketUserComponent {
     this.socketSubscription.unsubscribe()
   }
 }
+```
+
+## Reconnecting on failure
+
+This can be done with built-in rxjs operators:
+
+```javascript
+const input = new QueueingSubject<any>()
+const { messages, connectionStatus } = websocketConnect(`ws://server`, input)
+
+// try to reconnect every second
+messages.retryWhen(errors => errors.delay(1000)).subscribe(message => {
+  console.log(message)
+})
 ```
