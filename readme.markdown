@@ -1,6 +1,6 @@
 # rxjs-websockets
 
-An rxjs websocket library with a simple implementation built with flexibility in mind. Great for use with angular 2 or any other rxjs project.
+An rxjs websocket library with a simple implementation built with flexibility in mind. Great for use with angular 2 or any other rxjs project. Supports the browser and node.js.
 
 ## Comparisons to other rxjs websocket libraries:
 
@@ -139,4 +139,16 @@ const { messages, connectionStatus } = websocketConnect(`ws://server`, input)
 messages.retryWhen(errors => errors.delay(1000)).subscribe(message => {
   console.log(message)
 })
+```
+
+## How to use with alternate WebSocket implementations
+
+You can supply a websocket factory function (that takes a URL and returns an object that is compatible with WebSocket) as such:
+
+```javascript
+const { messages } = websocketConnect(
+  'ws://127.0.0.1:4201/ws',
+  this.inputStream = new QueueingSubject<any>(),
+  url => new WebSocket(url)
+)
 ```

@@ -7,11 +7,28 @@ export interface Connection {
   messages: Observable<any>,
 }
 
-export default function connect(url: string, input: Observable<any>): Connection {
+export interface IWebSocket {
+  close()
+  send(string)
+  onopen: Function
+  onclose: Function
+  onmessage: Function
+  onerror: Function
+}
+
+export type WebSocketFactory = (url: String) => IWebSocket
+
+const defaultWebsocketFactory = (url: string): IWebSocket => new WebSocket(url)
+
+export default function connect(
+  url: string,
+  input: Observable<any>,
+  websocketFactory: WebSocketFactory = defaultWebsocketFactory
+): Connection {
   const connectionStatus = new BehaviorSubject<number>(0)
 
   const messages = new Observable<any>(observer => {
-    const socket = new WebSocket(url)
+    const socket = websocketFactory(url)
     let inputSubscription: Subscription
 
     let open = false
