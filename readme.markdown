@@ -53,6 +53,8 @@ messagesSubscription.unsubscribe()
 connectionStatusSubscription.unsubscribe()
 ```
 
+`messages` is a cold observable, means the websocket connection is attempted lazily when a subscription is made to the `messages` observable. Advanced users of this library will find it important to understand the distinction between [hot and cold observables](https://blog.thoughtram.io/angular/2016/06/16/cold-vs-hot-observables.html), for most it will be sufficient to use the [share operator](http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-share) as shown below.
+
 ## How to use with angular 2
 
 You can write your own service to provide a websocket using this library as follows:
