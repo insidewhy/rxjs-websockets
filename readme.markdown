@@ -114,7 +114,7 @@ export class SocketUserComponent {
   ngOnInit() {
     this.socket.connect()
 
-    this.socketSubscription = this.socket.messages.subscribe(message:any => {
+    this.socketSubscription = this.socket.messages.subscribe((message:any) => {
       console.log('received message from server: ', message)
     })
 
