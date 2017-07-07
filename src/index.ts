@@ -17,14 +17,21 @@ export interface IWebSocket {
 }
 
 export type WebSocketFactory = (url: String) => IWebSocket
+export type WebSocketConfig = {
+  url: string,
+  input: Observable<any>,
+  websocketFactory?: WebSocketFactory,
+  jsonParse?: boolean
+}
 
 const defaultWebsocketFactory = (url: string): IWebSocket => new WebSocket(url)
 
-export default function connect(
-  url: string,
-  input: Observable<any>,
-  websocketFactory: WebSocketFactory = defaultWebsocketFactory
-): Connection {
+export default function connect({
+  url,
+  input,
+  websocketFactory = defaultWebsocketFactory,
+  jsonParse = true
+}: WebSocketConfig): Connection {
   const connectionStatus = new BehaviorSubject<number>(0)
 
   const messages = new Observable<any>(observer => {
@@ -44,12 +51,20 @@ export default function connect(
       open = true
       connectionStatus.next(connectionStatus.getValue() + 1)
       inputSubscription = input.subscribe(data => {
-        socket.send(JSON.stringify(data))
+        if (jsonParse) {
+          socket.send(JSON.stringify(data))
+          return
+        }
+        socket.send(data)
       })
     }
 
     socket.onmessage = message => {
-      observer.next(JSON.parse(message.data))
+      if (jsonParse) {
+        observer.next(JSON.parse(message.data))
+        return
+      }
+      observer.next(message.data)
     }
 
     socket.onerror = error => {

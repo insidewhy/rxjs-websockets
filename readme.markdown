@@ -27,7 +27,10 @@ import websocketConnect from 'rxjs-websockets'
 const input = new QueueingSubject()
 
 // this method returns an object which contains two observables
-const { messages, connectionStatus } = websocketConnect('ws://localhost/websocket-path', input)
+const { messages, connectionStatus } = websocketConnect({
+  url: 'ws://localhost/websocket-path',
+  input
+})
 
 // this value will be stringified before being sent to the server
 input.next({ whateverField: 'some data' })
@@ -78,10 +81,10 @@ export class ServerSocket {
     // Using share() causes a single websocket to be created when the first
     // observer subscribes. This socket is shared with subsequent observers
     // and closed when the observer count falls to zero.
-    this.messages = websocketConnect(
-      'ws://127.0.0.1:4201/ws',
-      this.inputStream = new QueueingSubject<any>()
-    ).messages.share()
+    this.messages = websocketConnect({
+      url: 'ws://127.0.0.1:4201/ws',
+      input: this.inputStream = new QueueingSubject<any>()
+    }).messages.share()
   }
 
   public send(message: any):void {
@@ -135,7 +138,10 @@ This can be done with built-in rxjs operators:
 
 ```javascript
 const input = new QueueingSubject<any>()
-const { messages, connectionStatus } = websocketConnect(`ws://server`, input)
+const { messages, connectionStatus } = websocketConnect({
+  url: `ws://server`, 
+  input
+})
 
 // try to reconnect every second
 messages.retryWhen(errors => errors.delay(1000)).subscribe(message => {
@@ -148,9 +154,21 @@ messages.retryWhen(errors => errors.delay(1000)).subscribe(message => {
 You can supply a websocket factory function (that takes a URL and returns an object that is compatible with WebSocket) as such:
 
 ```javascript
-const { messages } = websocketConnect(
-  'ws://127.0.0.1:4201/ws',
-  this.inputStream = new QueueingSubject<any>(),
-  url => new WebSocket(url)
-)
+const { messages } = websocketConnect({
+  url: 'ws://127.0.0.1:4201/ws',
+  input: this.inputStream = new QueueingSubject<any>(),
+  websocketFactory: url => new WebSocket(url)
+})
+```
+
+## How to disable JSON parsing
+
+You can disable the default `JSON.stringify` on received messages and `JSON.parse` on sent messages as such:
+
+```javascript
+const { messages } = websocketConnect({
+  url: 'ws://127.0.0.1:4201/ws',
+  input: this.inputStream = new QueueingSubject<any>(),
+  jsonParse: false
+})
 ```
