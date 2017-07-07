@@ -17,14 +17,19 @@ export interface IWebSocket {
 }
 
 export type WebSocketFactory = (url: String) => IWebSocket
+export type WebSocketConfig = {
+  url: string,
+  input: Observable<any>,
+  websocketFactory?: WebSocketFactory
+}
 
 const defaultWebsocketFactory = (url: string): IWebSocket => new WebSocket(url)
 
-export default function connect(
-  url: string,
-  input: Observable<any>,
-  websocketFactory: WebSocketFactory = defaultWebsocketFactory
-): Connection {
+export default function connect({
+  url,
+  input,
+  websocketFactory = defaultWebsocketFactory
+}: WebSocketConfig): Connection {
   const connectionStatus = new BehaviorSubject<number>(0)
 
   const messages = new Observable<any>(observer => {
