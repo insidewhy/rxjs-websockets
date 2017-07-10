@@ -154,3 +154,16 @@ const { messages } = websocketConnect(
   url => new WebSocket(url)
 )
 ```
+
+## How to disable JSON parsing
+
+If you prefer to handle raw messages, you can disable the default `JSON.stringify` on received messages and `JSON.parse` on sent messages with a falsy fourth parameter as such:
+
+```javascript
+const { messages } = websocketConnect(
+  'ws://127.0.0.1:4201/ws',
+  this.inputStream = new QueueingSubject<any>(),
+  url => new WebSocket(url),
+  false
+)
+```
