@@ -23,7 +23,8 @@ const defaultWebsocketFactory = (url: string): IWebSocket => new WebSocket(url)
 export default function connect(
   url: string,
   input: Observable<any>,
-  websocketFactory: WebSocketFactory = defaultWebsocketFactory
+  websocketFactory: WebSocketFactory = defaultWebsocketFactory,
+  jsonParse: boolean = true
 ): Connection {
   const connectionStatus = new BehaviorSubject<number>(0)
 
@@ -44,12 +45,14 @@ export default function connect(
       open = true
       connectionStatus.next(connectionStatus.getValue() + 1)
       inputSubscription = input.subscribe(data => {
-        socket.send(JSON.stringify(data))
+        const sendData = jsonParse ? JSON.stringify(data) : data
+        socket.send(sendData)
       })
     }
 
     socket.onmessage = message => {
-      observer.next(JSON.parse(message.data))
+      const nextData = jsonParse ? JSON.parse(message.data) : message.data
+      observer.next(nextData)
     }
 
     socket.onerror = error => {
