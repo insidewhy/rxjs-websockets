@@ -26,7 +26,7 @@ import { QueueingSubject } from 'queueing-subject'
 import websocketConnect from 'rxjs-websockets'
 
 // this subject queues as necessary to ensure every message is delivered
-const input = new QueueingSubject()
+const input = new QueueingSubject<any>()
 
 // this method returns an object which contains two observables
 const { messages, connectionStatus } = websocketConnect('ws://localhost/websocket-path', input)
