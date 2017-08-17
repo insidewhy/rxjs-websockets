@@ -1,5 +1,7 @@
 # rxjs-websockets
 
+[![build status](https://circleci.com/gh/ohjames/rxjs-websockets.png?style=shield)](https://circleci.com/gh/ohjames/rxjs-websockets)
+
 An rxjs websocket library with a simple implementation built with flexibility in mind. Great for use with angular 2 or any other rxjs project. Supports the browser and node.js.
 
 ## Comparisons to other rxjs websocket libraries:
