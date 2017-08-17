@@ -10,10 +10,10 @@ export interface Connection {
 export interface IWebSocket {
   close()
   send(string)
-  onopen: Function
-  onclose: Function
-  onmessage: Function
-  onerror: Function
+  onopen?: Function
+  onclose?: Function
+  onmessage?: Function
+  onerror?: Function
 }
 
 export type WebSocketFactory = (url: String) => IWebSocket
