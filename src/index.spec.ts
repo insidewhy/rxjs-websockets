@@ -14,33 +14,42 @@ describe('rxjs-websockets', () => {
   let expect: typeof scheduler.expectObservable
   let flush: typeof scheduler.flush
   let cold: typeof scheduler.createColdObservable
+  let hot: typeof scheduler.createHotObservable
   beforeEach(() => {
     scheduler = new TestScheduler(chai.assert.deepEqual)
     expect = scheduler.expectObservable.bind(scheduler)
     flush = scheduler.flush.bind(scheduler)
     cold = scheduler.createColdObservable.bind(scheduler)
+    hot = scheduler.createHotObservable.bind(scheduler)
   })
 
+  class MockSocket {
+    onmessage: Function
+    onopen: Function
+    onclose: Function
+    close = () => {}
+    // forwards input as output
+    send(data: string) { this.onmessage({ data }) }
+  }
+
+  const connectHelper = (input, mockSocket) => connect('url', input, () => mockSocket, false)
+
   it('connects to websocket lazily and retrieves data', () => {
-    const input = cold('abc|')
-    const close = sinon.stub()
-
-    const mockSocket = new class {
-      onmessage: Function
-      onopen: Function
-      onclose: Function
-      close = sinon.stub()
-
-      send(data: string) {
-        this.onmessage({ data })
-      }
-    }
-    const socketFactory = url => mockSocket
-
-    const { connectionStatus, messages } = connect('url', input, socketFactory, false)
-    expect(messages).toBe('-abc-|')
+    const mockSocket = new MockSocket()
+    const { connectionStatus, messages } = connectHelper(hot('abcd|'), mockSocket)
     scheduler.schedule(() => mockSocket.onopen(), 10)
-    scheduler.schedule(() => mockSocket.onclose({ wasClean: true }), 50)
+    expect(messages).toBe('-bcd')
+    flush()
+  })
+
+  it('ends stream on clean websocket close', () => {
+    const mockSocket = new class extends MockSocket {
+      close = sinon.stub()
+    }
+    const { connectionStatus, messages } = connectHelper(cold('a|'), mockSocket)
+    scheduler.schedule(() => mockSocket.onopen(), 10)
+    scheduler.schedule(() => mockSocket.onclose({ wasClean: true }), 30)
+    expect(messages).toBe('-a-|')
     flush()
 
     mockSocket.close.should.have.been.calledOnce
