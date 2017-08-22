@@ -1,5 +1,7 @@
 import 'mocha'
+import 'rxjs'
 import { TestScheduler } from 'rxjs/testing/TestScheduler'
+import { Observable } from 'rxjs/Observable'
 import * as chai from 'chai'
 import * as sinon from 'sinon'
 import * as sinonChai from 'sinon-chai'
@@ -36,9 +38,9 @@ describe('rxjs-websockets', () => {
 
   it('connects to websocket lazily and retrieves data', () => {
     const mockSocket = new MockSocket()
-    const { connectionStatus, messages } = connectHelper(hot('abcd|'), mockSocket)
-    scheduler.schedule(() => mockSocket.onopen(), 10)
-    expect(messages).toBe('-bcd')
+    const { connectionStatus, messages } = connectHelper(hot('abcde|'), mockSocket)
+    scheduler.schedule(() => mockSocket.onopen(), 15)
+    expect(Observable.of(null).delay(14, scheduler).switchMapTo(messages)).toBe('--cde')
     flush()
   })
 
