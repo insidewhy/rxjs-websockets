@@ -32,7 +32,7 @@ const input = new QueueingSubject<string>()
 const { messages, connectionStatus } = websocketConnect('ws://localhost/websocket-path', input)
 
 // this value will be stringified before being sent to the server
-input.next({ whateverField: 'some data' })
+input.next('some data')
 
 // the connectionStatus stream will provides the current number of websocket
 // connections immediately to each new observer and updates as it changes
@@ -42,8 +42,7 @@ const connectionStatusSubscription = connectionStatus.subscribe(numberConnected 
 
 // the websocket connection is created lazily when the messages observable is
 // subscribed to
-const messagesSubscription = messages.subscribe(message => {
-  // message is the message from the server parsed with JSON.parse(...)
+const messagesSubscription = messages.subscribe((message: string) => {
   console.log('received message:', message)
 })
 
@@ -122,7 +121,7 @@ export class SocketUserComponent {
 
     // send message to server, if the socket is not connected it will be sent
     // as soon as the connection becomes available thanks to QueueingSubject
-    this.socket.send({ type: 'helloServer' })
+    this.socket.send('hello')
   }
 
   ngOnDestroy() {
@@ -157,13 +156,15 @@ const { messages } = websocketConnect(
 )
 ```
 
-## How to use JSON messages and responses
+## How to use with JSON messages and responses
+
+This function can be called instead of `websocketConnect`:
 
 ```javascript
 function jsonWebsocketConnect(url: string, input: Observable<object>) {
-  const jsonInput = input.map(message => JSON.stringify(message));
-  const { messages, connectionStatus } = websocketConnect(url, jsonInput)
+  const jsonInput = input.map(message => JSON.stringify(message))
+  const { connectionStatus, messages } = websocketConnect(url, jsonInput)
   const jsonMessages = messages.map(message => JSON.parse(message))
-  return { messages: jsonMessages, connectionStatus }
+  return { connectionStatus, messages: jsonMessages }
 }
 ```
