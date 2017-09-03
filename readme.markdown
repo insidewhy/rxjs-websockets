@@ -97,7 +97,7 @@ function jsonWebsocketConnect(url: string, input: Observable<object>) {
 
 ## Angular 4 example
 
-The following is an example Angular 4 service that uses `rxjs-websockets`.
+The following is a very simple example Angular 4 service that uses `rxjs-websockets` to expose the messages from the server as an observable and take input messages using a procedural API. In most cases it would be preferable to wire the input stream up directly from one or more source observables.
 
 ```javascript
 // file: server-socket.service.ts
