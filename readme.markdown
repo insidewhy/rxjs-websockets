@@ -9,7 +9,7 @@ An rxjs websocket library with a simple implementation built with flexibility in
  * [observable-socket](https://github.com/killtheliterate/observable-socket) provides the input stream for the user, in rxjs-websockets the input stream is taken as a parameter allowing the user to choose the appropriate subject or observable for their needs. [queueing-subject](https://github.com/ohjames/queueing-subject) can be used to achieve the same semantics as observable-socket. rxjs-websockets exposes the websocket connection status as an observable, with observable-socket the WebSocket object must be used directly to listen for connection status changes.
  * [rxjs built-in websocket subject](https://github.com/ReactiveX/rxjs/blob/next/src/observable/dom/webSocket.ts): Implemented as a Subject so lacks the flexibility that rxjs-websockets and observable-socket provide. It does not provide any ability to monitor the web socket connection state.
 
-## How to install (with webpack/angular-cli)
+## Installation
 
 Install the dependency:
 
@@ -19,7 +19,7 @@ npm install -S rxjs-websockets
 npm install -S queueing-subject
 ```
 
-## How to use
+## Simple usage
 
 ```javascript
 import { QueueingSubject } from 'queueing-subject'
@@ -56,9 +56,48 @@ connectionStatusSubscription.unsubscribe()
 
 `messages` is a cold observable, means the websocket connection is attempted lazily when a subscription is made to the `messages` observable. Advanced users of this library will find it important to understand the distinction between [hot and cold observables](https://blog.thoughtram.io/angular/2016/06/16/cold-vs-hot-observables.html), for most it will be sufficient to use the [share operator](http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-share) as shown below.
 
-## How to use with angular 2
+## Reconnecting on failure
 
-You can write your own service to provide a websocket using this library as follows:
+This can be done with built-in rxjs operators:
+
+```javascript
+const input = new QueueingSubject<string>()
+const { messages, connectionStatus } = websocketConnect(`ws://server`, input)
+
+// try to reconnect every second
+messages.retryWhen(errors => errors.delay(1000)).subscribe(message => {
+  console.log(message)
+})
+```
+
+## Alternate WebSocket implementations
+
+You can supply a websocket factory function (that takes a URL and returns an object that is compatible with WebSocket) as such:
+
+```javascript
+const { messages } = websocketConnect(
+  'ws://127.0.0.1:4201/ws',
+  this.inputStream = new QueueingSubject<string>(),
+  url => new WebSocket(url)
+)
+```
+
+## JSON messages and responses
+
+This function can be called instead of `websocketConnect`:
+
+```javascript
+function jsonWebsocketConnect(url: string, input: Observable<object>) {
+  const jsonInput = input.map(message => JSON.stringify(message))
+  const { connectionStatus, messages } = websocketConnect(url, jsonInput)
+  const jsonMessages = messages.map(message => JSON.parse(message))
+  return { connectionStatus, messages: jsonMessages }
+}
+```
+
+## Angular 4 example
+
+The following is an example Angular 4 service that uses `rxjs-websockets`.
 
 ```javascript
 // file: server-socket.service.ts
@@ -127,44 +166,5 @@ export class SocketUserComponent {
   ngOnDestroy() {
     this.socketSubscription.unsubscribe()
   }
-}
-```
-
-## Reconnecting on failure
-
-This can be done with built-in rxjs operators:
-
-```javascript
-const input = new QueueingSubject<string>()
-const { messages, connectionStatus } = websocketConnect(`ws://server`, input)
-
-// try to reconnect every second
-messages.retryWhen(errors => errors.delay(1000)).subscribe(message => {
-  console.log(message)
-})
-```
-
-## How to use with alternate WebSocket implementations
-
-You can supply a websocket factory function (that takes a URL and returns an object that is compatible with WebSocket) as such:
-
-```javascript
-const { messages } = websocketConnect(
-  'ws://127.0.0.1:4201/ws',
-  this.inputStream = new QueueingSubject<string>(),
-  url => new WebSocket(url)
-)
-```
-
-## How to use with JSON messages and responses
-
-This function can be called instead of `websocketConnect`:
-
-```javascript
-function jsonWebsocketConnect(url: string, input: Observable<object>) {
-  const jsonInput = input.map(message => JSON.stringify(message))
-  const { connectionStatus, messages } = websocketConnect(url, jsonInput)
-  const jsonMessages = messages.map(message => JSON.parse(message))
-  return { connectionStatus, messages: jsonMessages }
 }
 ```
