@@ -26,7 +26,7 @@ import { QueueingSubject } from 'queueing-subject'
 import websocketConnect from 'rxjs-websockets'
 
 // this subject queues as necessary to ensure every message is delivered
-const input = new QueueingSubject<any>()
+const input = new QueueingSubject<string>()
 
 // this method returns an object which contains two observables
 const { messages, connectionStatus } = websocketConnect('ws://localhost/websocket-path', input)
@@ -44,7 +44,7 @@ const connectionStatusSubscription = connectionStatus.subscribe(numberConnected 
 // subscribed to
 const messagesSubscription = messages.subscribe(message => {
   // message is the message from the server parsed with JSON.parse(...)
-  console.log('received message:', JSON.stringify(message))
+  console.log('received message:', message)
 })
 
 // this will close the websocket
@@ -70,8 +70,8 @@ import websocketConnect from 'rxjs-websockets'
 
 @Injectable()
 export class ServerSocket {
-  private inputStream: QueueingSubject<any>
-  public messages: Observable<any>
+  private inputStream: QueueingSubject<string>
+  public messages: Observable<string>
 
   public connect() {
     if (this.messages)
@@ -82,11 +82,11 @@ export class ServerSocket {
     // and closed when the observer count falls to zero.
     this.messages = websocketConnect(
       'ws://127.0.0.1:4201/ws',
-      this.inputStream = new QueueingSubject<any>()
+      this.inputStream = new QueueingSubject<string>()
     ).messages.share()
   }
 
-  public send(message: any):void {
+  public send(message: string):void {
     // If the websocket is not connected then the QueueingSubject will ensure
     // that messages are queued and delivered when the websocket reconnects.
     // A regular Subject can be used to discard messages sent when the websocket
@@ -116,7 +116,7 @@ export class SocketUserComponent {
   ngOnInit() {
     this.socket.connect()
 
-    this.socketSubscription = this.socket.messages.subscribe((message:any) => {
+    this.socketSubscription = this.socket.messages.subscribe((message: string) => {
       console.log('received message from server: ', message)
     })
 
@@ -136,7 +136,7 @@ export class SocketUserComponent {
 This can be done with built-in rxjs operators:
 
 ```javascript
-const input = new QueueingSubject<any>()
+const input = new QueueingSubject<string>()
 const { messages, connectionStatus } = websocketConnect(`ws://server`, input)
 
 // try to reconnect every second
@@ -152,20 +152,18 @@ You can supply a websocket factory function (that takes a URL and returns an obj
 ```javascript
 const { messages } = websocketConnect(
   'ws://127.0.0.1:4201/ws',
-  this.inputStream = new QueueingSubject<any>(),
+  this.inputStream = new QueueingSubject<string>(),
   url => new WebSocket(url)
 )
 ```
 
-## How to disable JSON parsing
-
-If you prefer to handle raw messages, you can disable the default `JSON.stringify` on received messages and `JSON.parse` on sent messages with a falsy fourth parameter as such:
+## How to use JSON messages and responses
 
 ```javascript
-const { messages } = websocketConnect(
-  'ws://127.0.0.1:4201/ws',
-  this.inputStream = new QueueingSubject<any>(),
-  url => new WebSocket(url),
-  false
-)
+function jsonWebsocketConnect(url: string, input: Observable<object>) {
+  const jsonInput = input.map(message => JSON.stringify(message));
+  const { messages, connectionStatus } = websocketConnect(url, jsonInput)
+  const jsonMessages = messages.map(message => JSON.parse(message))
+  return { messages: jsonMessages, connectionStatus }
+}
 ```

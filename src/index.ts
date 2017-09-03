@@ -3,8 +3,8 @@ import { Subscription } from 'rxjs/Subscription'
 import { BehaviorSubject } from 'rxjs/BehaviorSubject'
 
 export interface Connection {
-  connectionStatus: Observable<any>,
-  messages: Observable<any>,
+  connectionStatus: Observable<number>,
+  messages: Observable<string>,
 }
 
 export interface IWebSocket {
@@ -24,11 +24,10 @@ export default function connect(
   url: string,
   input: Observable<any>,
   websocketFactory: WebSocketFactory = defaultWebsocketFactory,
-  jsonParse: boolean = true
 ): Connection {
   const connectionStatus = new BehaviorSubject<number>(0)
 
-  const messages = new Observable<any>(observer => {
+  const messages = new Observable<string>(observer => {
     const socket = websocketFactory(url)
     let inputSubscription: Subscription
 
@@ -45,14 +44,12 @@ export default function connect(
       open = true
       connectionStatus.next(connectionStatus.getValue() + 1)
       inputSubscription = input.subscribe(data => {
-        const sendData = jsonParse ? JSON.stringify(data) : data
-        socket.send(sendData)
+        socket.send(data)
       })
     }
 
     socket.onmessage = message => {
-      const nextData = jsonParse ? JSON.parse(message.data) : message.data
-      observer.next(nextData)
+      observer.next(message.data)
     }
 
     socket.onerror = error => {
