@@ -31,7 +31,7 @@ const input = new QueueingSubject<string>()
 // this method returns an object which contains two observables
 const { messages, connectionStatus } = websocketConnect('ws://localhost/websocket-path', input)
 
-// this value will be stringified before being sent to the server
+// send data to the server
 input.next('some data')
 
 // the connectionStatus stream will provides the current number of websocket
@@ -54,7 +54,7 @@ messagesSubscription.unsubscribe()
 connectionStatusSubscription.unsubscribe()
 ```
 
-`messages` is a cold observable, means the websocket connection is attempted lazily when a subscription is made to the `messages` observable. Advanced users of this library will find it important to understand the distinction between [hot and cold observables](https://blog.thoughtram.io/angular/2016/06/16/cold-vs-hot-observables.html), for most it will be sufficient to use the [share operator](http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-share) as shown below.
+`messages` is a cold observable, this means the websocket connection is attempted lazily when a subscription is made to the `messages` observable. Advanced users of this library will find it important to understand the distinction between [hot and cold observables](https://blog.thoughtram.io/angular/2016/06/16/cold-vs-hot-observables.html), for most it will be sufficient to use the [share operator](http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-share) as shown in the Angular example below.
 
 ## Reconnecting on failure
 
@@ -72,7 +72,7 @@ messages.retryWhen(errors => errors.delay(1000)).subscribe(message => {
 
 ## Alternate WebSocket implementations
 
-You can supply a websocket factory function (that takes a URL and returns an object that is compatible with WebSocket) as such:
+A custom websocket factory function can be supplied that takes a URL and returns an object that is compatible with WebSocket:
 
 ```javascript
 const { messages } = websocketConnect(
