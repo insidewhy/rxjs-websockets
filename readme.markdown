@@ -84,7 +84,7 @@ const { messages } = websocketConnect(
 
 ## JSON messages and responses
 
-This function can be called instead of `websocketConnect`:
+This example shows how to use the `map` operator to handle JSON encoding of outgoing messages and parsing of responses:
 
 ```javascript
 function jsonWebsocketConnect(url: string, input: Observable<object>) {
