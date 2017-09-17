@@ -9,26 +9,27 @@ export interface Connection {
 
 export interface IWebSocket {
   close()
-  send(string)
-  onopen?: Function
-  onclose?: Function
-  onmessage?: Function
-  onerror?: Function
+  send(data: string | ArrayBuffer | Blob)
+  onopen?: (OpenEvent) => any
+  onclose?: (CloseEvent) => any
+  onmessage?: (MessageEvent) => any
+  onerror?: (ErrorEvent) => any
 }
 
-export type WebSocketFactory = (url: String) => IWebSocket
+export type WebSocketFactory = (url: string, protocols?: string | string[]) => IWebSocket
 
-const defaultWebsocketFactory = (url: string): IWebSocket => new WebSocket(url)
+const defaultWebsocketFactory = (url: string, protocol?: string): IWebSocket => new WebSocket(url, protocol)
 
 export default function connect(
   url: string,
   input: Observable<any>,
+  protocols: string | string[],
   websocketFactory: WebSocketFactory = defaultWebsocketFactory,
 ): Connection {
   const connectionStatus = new BehaviorSubject<number>(0)
 
   const messages = new Observable<string>(observer => {
-    const socket = websocketFactory(url)
+    const socket = websocketFactory(url, protocols)
     let inputSubscription: Subscription
 
     let open = false
@@ -48,11 +49,11 @@ export default function connect(
       })
     }
 
-    socket.onmessage = message => {
+    socket.onmessage = (message: MessageEvent) => {
       observer.next(message.data)
     }
 
-    socket.onerror = error => {
+    socket.onerror = (error: ErrorEvent) => {
       closed()
       observer.error(error)
     }

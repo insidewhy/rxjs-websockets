@@ -34,7 +34,7 @@ describe('rxjs-websockets', () => {
     send(data: string) { this.onmessage({ data }) }
   }
 
-  const connectHelper = (input, mockSocket) => connect('url', input, () => mockSocket)
+  const connectHelper = (input, mockSocket, protocols?) => connect('url', input, protocols, () => mockSocket)
 
   it('connects to websocket lazily and retrieves data', () => {
     const mockSocket = new MockSocket()

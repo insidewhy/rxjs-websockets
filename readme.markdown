@@ -78,7 +78,8 @@ A custom websocket factory function can be supplied that takes a URL and returns
 const { messages } = websocketConnect(
   'ws://127.0.0.1:4201/ws',
   this.inputStream = new QueueingSubject<string>(),
-  url => new WebSocket(url)
+  undefined,
+  (url, protocols) => new WebSocket(url, protocols)
 )
 ```
 
@@ -87,9 +88,9 @@ const { messages } = websocketConnect(
 This example shows how to use the `map` operator to handle JSON encoding of outgoing messages and parsing of responses:
 
 ```javascript
-function jsonWebsocketConnect(url: string, input: Observable<object>) {
+function jsonWebsocketConnect(url: string, input: Observable<object>, protocols?: string) {
   const jsonInput = input.map(message => JSON.stringify(message))
-  const { connectionStatus, messages } = websocketConnect(url, jsonInput)
+  const { connectionStatus, messages } = websocketConnect(url, jsonInput, protocols)
   const jsonMessages = messages.map(message => JSON.parse(message))
   return { connectionStatus, messages: jsonMessages }
 }
