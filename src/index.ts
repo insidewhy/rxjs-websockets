@@ -23,7 +23,7 @@ const defaultWebsocketFactory = (url: string, protocol?: string): IWebSocket => 
 export default function connect(
   url: string,
   input: Observable<string>,
-  protocols: string | string[],
+  protocols?: string | string[],
   websocketFactory: WebSocketFactory = defaultWebsocketFactory,
 ): Connection {
   const connectionStatus = new BehaviorSubject<number>(0)
