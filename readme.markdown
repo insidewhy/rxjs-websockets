@@ -21,7 +21,7 @@ npm install -S queueing-subject
 
 ## Simple usage
 
-```javascript
+```typescript
 import { QueueingSubject } from 'queueing-subject'
 import websocketConnect from 'rxjs-websockets'
 
@@ -60,7 +60,7 @@ connectionStatusSubscription.unsubscribe()
 
 This can be done with built-in rxjs operators:
 
-```javascript
+```typescript
 const input = new QueueingSubject<string>()
 const { messages, connectionStatus } = websocketConnect(`ws://server`, input)
 
@@ -74,7 +74,7 @@ messages.retryWhen(errors => errors.delay(1000)).subscribe(message => {
 
 A custom websocket factory function can be supplied that takes a URL and returns an object that is compatible with WebSocket:
 
-```javascript
+```typescript
 const { messages } = websocketConnect(
   'ws://127.0.0.1:4201/ws',
   this.inputStream = new QueueingSubject<string>(),
@@ -83,12 +83,42 @@ const { messages } = websocketConnect(
 )
 ```
 
+## Protocols
+
+The API typings follow which show how to use all features including protocols:
+
+```typescript
+export interface Connection {
+    connectionStatus: Observable<number>;
+    messages: Observable<string>;
+}
+
+export interface IWebSocket {
+    close(): any;
+    send(data: string | ArrayBuffer | Blob): any;
+    onopen?: (OpenEvent) => any;
+    onclose?: (CloseEvent) => any;
+    onmessage?: (MessageEvent) => any;
+    onerror?: (ErrorEvent) => any;
+}
+
+export declare type WebSocketFactory = (url: string, protocols?: string | string[]) => IWebSocket;
+
+export default function connect(
+  url: string,
+  input: Observable<string>,
+  protocols: string | string[],
+  websocketFactory?: WebSocketFactory
+): Connection;
+```
+
+
 ## JSON messages and responses
 
 This example shows how to use the `map` operator to handle JSON encoding of outgoing messages and parsing of responses:
 
-```javascript
-function jsonWebsocketConnect(url: string, input: Observable<object>, protocols?: string) {
+```typescript
+function jsonWebsocketConnect(url: string, input: Observable<object>, protocols?: string | string[]) {
   const jsonInput = input.map(message => JSON.stringify(message))
   const { connectionStatus, messages } = websocketConnect(url, jsonInput, protocols)
   const jsonMessages = messages.map(message => JSON.parse(message))
@@ -100,7 +130,7 @@ function jsonWebsocketConnect(url: string, input: Observable<object>, protocols?
 
 The following is a very simple example Angular 4 service that uses `rxjs-websockets` to expose the messages from the server as an observable and take input messages using a procedural API. In most cases it would be preferable to wire the input stream up directly from one or more source observables.
 
-```javascript
+```typescript
 // file: server-socket.service.ts
 import { Injectable } from '@angular/core'
 import { QueueingSubject } from 'queueing-subject'
@@ -137,7 +167,7 @@ export class ServerSocket {
 
 This service could be used like this:
 
-```javascript
+```typescript
 import { Component } from '@angular/core'
 import { Subscription } from 'rxjs/Subscription'
 import { ServerSocket } from './server-socket.service'
