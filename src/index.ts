@@ -22,7 +22,7 @@ const defaultWebsocketFactory = (url: string, protocol?: string): IWebSocket => 
 
 export default function connect(
   url: string,
-  input: Observable<any>,
+  input: Observable<string>,
   protocols: string | string[],
   websocketFactory: WebSocketFactory = defaultWebsocketFactory,
 ): Connection {
