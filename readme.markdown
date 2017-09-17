@@ -89,17 +89,17 @@ The API typings follow which show how to use all features including protocols:
 
 ```typescript
 export interface Connection {
-    connectionStatus: Observable<number>;
-    messages: Observable<string>;
+  connectionStatus: Observable<number>;
+  messages: Observable<string>;
 }
 
 export interface IWebSocket {
-    close(): any;
-    send(data: string | ArrayBuffer | Blob): any;
-    onopen?: (OpenEvent) => any;
-    onclose?: (CloseEvent) => any;
-    onmessage?: (MessageEvent) => any;
-    onerror?: (ErrorEvent) => any;
+  close(): any;
+  send(data: string | ArrayBuffer | Blob): any;
+  onopen?: (OpenEvent) => any;
+  onclose?: (CloseEvent) => any;
+  onmessage?: (MessageEvent) => any;
+  onerror?: (ErrorEvent) => any;
 }
 
 export declare type WebSocketFactory = (url: string, protocols?: string | string[]) => IWebSocket;
