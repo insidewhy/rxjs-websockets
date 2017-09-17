@@ -107,7 +107,7 @@ export declare type WebSocketFactory = (url: string, protocols?: string | string
 export default function connect(
   url: string,
   input: Observable<string>,
-  protocols: string | string[],
+  protocols?: string | string[],
   websocketFactory?: WebSocketFactory
 ): Connection
 ```
