@@ -18,7 +18,7 @@
     "build:watch": "tsc -w -p src",
     "test": "npm run build && npm run mocha",
     "watch": "concurrently 'npm run build:watch' 'npm run mocha:watch'",
-    "prepublish": "npm run build",
+    "prepare": "npm run build",
     "mocha": "mocha lib/*.spec.js",
     "mocha:watch": "npm run mocha -- -w"
   },
