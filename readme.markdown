@@ -136,6 +136,7 @@ import { Injectable } from '@angular/core'
 import { QueueingSubject } from 'queueing-subject'
 import { Observable } from 'rxjs/Observable'
 import websocketConnect from 'rxjs-websockets'
+import 'rxjs/add/operator/share'
 
 @Injectable()
 export class ServerSocket {
