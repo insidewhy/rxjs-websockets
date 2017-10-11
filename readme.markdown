@@ -2,12 +2,17 @@
 
 [![build status](https://circleci.com/gh/ohjames/rxjs-websockets.png?style=shield)](https://circleci.com/gh/ohjames/rxjs-websockets)
 
-An rxjs websocket library with a simple implementation built with flexibility in mind. Great for use with angular 2 or any other rxjs project. Supports the browser and node.js.
+An rxjs websocket library with a simple and flexible implementation. Supports the browser and node.js.
 
 ## Comparisons to other rxjs websocket libraries:
 
- * [observable-socket](https://github.com/killtheliterate/observable-socket) provides the input stream for the user, in rxjs-websockets the input stream is taken as a parameter allowing the user to choose the appropriate subject or observable for their needs. [queueing-subject](https://github.com/ohjames/queueing-subject) can be used to achieve the same semantics as observable-socket. rxjs-websockets exposes the websocket connection status as an observable, with observable-socket the WebSocket object must be used directly to listen for connection status changes.
- * [rxjs built-in websocket subject](https://github.com/ReactiveX/rxjs/blob/next/src/observable/dom/webSocket.ts): Implemented as a Subject so lacks the flexibility that rxjs-websockets and observable-socket provide. It does not provide any ability to monitor the web socket connection state.
+ * [observable-socket](https://github.com/killtheliterate/observable-socket)
+   * This library provides an input subject for the user, rxjs-websockets allows the user to supply the input stream as a parameter to achieve the semantics appropriate for their use case ([queueing-subject](https://github.com/ohjames/queueing-subject) can be used to achieve the same semantics as observable-socket)
+   * With observable-socket the WebSocket object must be used and managed by the user, rxjs-websocket connects the websocket for the user lazily as required according to subscriptions to the returned messages observable.
+   * With observable-socket the WebSocket object must be observed using plain old events to detect connection, rxjs-websockets provides the connection status as an observable.
+ * [rxjs built-in websocket subject](https://github.com/ReactiveX/rxjs/blob/next/src/observable/dom/webSocket.ts)
+   * Implemented as a Subject so lacks the flexibility that rxjs-websockets and observable-socket provide.
+   * Does not provide any ability to monitor the web socket connection state.
 
 ## Installation
 
