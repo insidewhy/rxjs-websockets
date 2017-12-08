@@ -1,5 +1,5 @@
-import { Observable } from 'rxjs/Observable'
-import { Subscription } from 'rxjs/Subscription'
+import { Observable, Subscribable } from 'rxjs/Observable'
+import { AnonymousSubscription } from 'rxjs/Subscription'
 import { BehaviorSubject } from 'rxjs/BehaviorSubject'
 
 export interface Connection {
@@ -22,7 +22,7 @@ const defaultWebsocketFactory = (url: string, protocol?: string): IWebSocket => 
 
 export default function connect(
   url: string,
-  input: Observable<string>,
+  input: Subscribable<string>,
   protocols?: string | string[],
   websocketFactory: WebSocketFactory = defaultWebsocketFactory,
 ): Connection {
@@ -30,7 +30,7 @@ export default function connect(
 
   const messages = new Observable<string>(observer => {
     const socket = websocketFactory(url, protocols)
-    let inputSubscription: Subscription
+    let inputSubscription: AnonymousSubscription
 
     let open = false
     const closed = () => {
