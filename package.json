@@ -1,6 +1,6 @@
 {
   "name": "rxjs-websockets",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "description": "rxjs 5 websockets library, ideal for use with angular 2",
   "main": "lib/index.js",
   "typings": "lib/index",
@@ -25,7 +25,7 @@
   "author": "James Pike <github@chilon.net>",
   "license": "ISC",
   "peerDependencies": {
-    "rxjs": "^5.0.1"
+    "rxjs": "^6.1.0"
   },
   "devDependencies": {
     "@types/chai": "^4.0.1",
@@ -35,7 +35,7 @@
     "chai": "^4.1.0",
     "concurrently": "^3.5.0",
     "mocha": "^3.4.2",
-    "rxjs": "^5.0.1",
+    "rxjs": "^6.1.0",
     "sinon": "^3.2.1",
     "sinon-chai": "^2.13.0",
     "typescript": "^2.1.6"
