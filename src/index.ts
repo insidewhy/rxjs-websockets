@@ -31,6 +31,8 @@ export default function connect(
     let inputSubscription: Subscription
 
     let open = false
+    let forcedClose = false
+
     const closed = () => {
       if (! open)
         return
@@ -58,13 +60,14 @@ export default function connect(
 
     socket.onclose = (event: CloseEvent) => {
       closed()
-      if (event.wasClean)
+      if (forcedClose)
         observer.complete()
       else
         observer.error(new Error(event.reason))
     }
 
     return () => {
+      forcedClose = true
       if (inputSubscription)
         inputSubscription.unsubscribe()
 

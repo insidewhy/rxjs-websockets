@@ -2,7 +2,8 @@ import 'mocha'
 import 'rxjs'
 import { TestScheduler } from 'rxjs/testing'
 import { Observable, of } from 'rxjs'
-import { delay, switchMapTo } from 'rxjs/operators';
+import { delay, switchMapTo, catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs/internal/observable/throwError';
 import * as chai from 'chai'
 import * as sinon from 'sinon'
 import * as sinonChai from 'sinon-chai'
@@ -45,16 +46,25 @@ describe('rxjs-websockets', () => {
     flush()
   })
 
-  it('ends stream on clean websocket close', () => {
+  it('closes websocket on unsubscribe', () => {
     const mockSocket = new class extends MockSocket {
       close = sinon.stub()
     }
-    const { connectionStatus, messages } = connectHelper(cold('a|'), mockSocket)
+    const { messages } = connectHelper(cold('a|'), mockSocket)
     scheduler.schedule(() => mockSocket.onopen(), 10)
-    scheduler.schedule(() => mockSocket.onclose({ wasClean: true }), 30)
-    expect(messages).toBe('-a-|')
+    expect(messages, '--!').toBe('-a')
     flush()
 
     mockSocket.close.should.have.been.calledOnce
+  })
+
+  it('errors on unclean websocket close', () => {
+    const mockSocket = new MockSocket()
+    const { messages } = connectHelper(cold('a'), mockSocket)
+    scheduler.schedule(() => mockSocket.onopen(), 10)
+    scheduler.schedule(() => mockSocket.onclose({ reason: 'Normal closure' }), 30)
+    expect(messages.pipe(catchError(error => throwError(error.message))))
+      .toBe('-a-#', undefined, 'Normal closure')
+    flush()
   })
 })
