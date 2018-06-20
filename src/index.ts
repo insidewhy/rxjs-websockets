@@ -71,7 +71,7 @@ export default function connect(
       if (inputSubscription)
         inputSubscription.unsubscribe()
 
-      if (socket) {
+      if (open) {
         closed()
         socket.close()
       }
