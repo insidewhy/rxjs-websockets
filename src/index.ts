@@ -27,7 +27,13 @@ export default function connect(
   const connectionStatus = new BehaviorSubject<number>(0)
 
   const messages = new Observable<string>(observer => {
-    const socket = websocketFactory(url, protocols)
+
+    let socket;
+    try {
+      socket = websocketFactory(url, protocols);
+    } catch(err) {
+      console.log(err);
+    }
     let inputSubscription: Subscription
 
     let open = false
@@ -41,30 +47,33 @@ export default function connect(
       open = false
     }
 
-    socket.onopen = () => {
-      open = true
-      connectionStatus.next(connectionStatus.getValue() + 1)
-      inputSubscription = input.subscribe(data => {
-        socket.send(data)
-      })
+    if (socket){
+      socket.onopen = () => {
+        open = true
+        connectionStatus.next(connectionStatus.getValue() + 1)
+        inputSubscription = input.subscribe(data => {
+          socket.send(data)
+        })
+      }
+
+      socket.onmessage = (message: MessageEvent) => {
+        observer.next(message.data)
+      }
+
+      socket.onerror = (error: ErrorEvent) => {
+        closed()
+        observer.error(error)
+      }
+
+      socket.onclose = (event: CloseEvent) => {
+        closed()
+        if (forcedClose)
+          observer.complete()
+        else
+          observer.error(new Error(event.reason))
+      }
     }
 
-    socket.onmessage = (message: MessageEvent) => {
-      observer.next(message.data)
-    }
-
-    socket.onerror = (error: ErrorEvent) => {
-      closed()
-      observer.error(error)
-    }
-
-    socket.onclose = (event: CloseEvent) => {
-      closed()
-      if (forcedClose)
-        observer.complete()
-      else
-        observer.error(new Error(event.reason))
-    }
 
     return () => {
       forcedClose = true
@@ -73,7 +82,9 @@ export default function connect(
 
       if (open) {
         closed()
-        socket.close()
+        if (socket){
+          socket.close()
+        }
       }
     }
   })
