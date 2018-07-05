@@ -43,6 +43,7 @@ export default function connect(
 
     socket.onopen = () => {
       open = true
+      forcedClose = false
       connectionStatus.next(connectionStatus.getValue() + 1)
       inputSubscription = input.subscribe(data => {
         socket.send(data)
@@ -60,7 +61,7 @@ export default function connect(
 
     socket.onclose = (event: CloseEvent) => {
       closed()
-      if (forcedClose)
+      if (event.code === 1000 && forcedClose)
         observer.complete()
       else
         observer.error(new Error(event.reason))
