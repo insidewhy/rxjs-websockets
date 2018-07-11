@@ -117,7 +117,6 @@ export default function connect(
 ): Connection
 ```
 
-
 ## JSON messages and responses
 
 This example shows how to use the `map` operator to handle JSON encoding of outgoing messages and parsing of responses:
@@ -131,77 +130,3 @@ function jsonWebsocketConnect(url: string, input: Observable<object>, protocols?
 }
 ```
 
-## Angular 4 example
-
-The following is a very simple example Angular 4 service that uses `rxjs-websockets` to expose the messages from the server as an observable and take input messages using a procedural API. In most cases it would be preferable to wire the input stream up directly from one or more source observables.
-
-```typescript
-// file: server-socket.service.ts
-import { Injectable } from '@angular/core'
-import { QueueingSubject } from 'queueing-subject'
-import { Observable } from 'rxjs/Observable'
-import websocketConnect from 'rxjs-websockets'
-import 'rxjs/add/operator/share'
-
-@Injectable()
-export class ServerSocket {
-  private inputStream: QueueingSubject<string>
-  public messages: Observable<string>
-
-  public connect() {
-    if (this.messages)
-      return
-
-    // Using share() causes a single websocket to be created when the first
-    // observer subscribes. This socket is shared with subsequent observers
-    // and closed when the observer count falls to zero.
-    this.messages = websocketConnect(
-      'ws://127.0.0.1:4201/ws',
-      this.inputStream = new QueueingSubject<string>()
-    ).messages.share()
-  }
-
-  public send(message: string):void {
-    // If the websocket is not connected then the QueueingSubject will ensure
-    // that messages are queued and delivered when the websocket reconnects.
-    // A regular Subject can be used to discard messages sent when the websocket
-    // is disconnected.
-    this.inputStream.next(message)
-  }
-}
-```
-
-This service could be used like this:
-
-```typescript
-import { Component } from '@angular/core'
-import { Subscription } from 'rxjs/Subscription'
-import { ServerSocket } from './server-socket.service'
-
-@Component({
-  selector: 'socket-user',
-  templateUrl: './socket-user.component.html',
-  styleUrls: ['./socket-user.component.scss']
-})
-export class SocketUserComponent {
-  private socketSubscription: Subscription
-
-  constructor(private socket: ServerSocket) {}
-
-  ngOnInit() {
-    this.socket.connect()
-
-    this.socketSubscription = this.socket.messages.subscribe((message: string) => {
-      console.log('received message from server: ', message)
-    })
-
-    // send message to server, if the socket is not connected it will be sent
-    // as soon as the connection becomes available thanks to QueueingSubject
-    this.socket.send('hello')
-  }
-
-  ngOnDestroy() {
-    this.socketSubscription.unsubscribe()
-  }
-}
-```
