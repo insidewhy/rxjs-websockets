@@ -70,7 +70,9 @@ const input = new QueueingSubject<string>()
 const { messages, connectionStatus } = websocketConnect(`ws://server`, input)
 
 // try to reconnect every second
-messages.retryWhen(errors => errors.delay(1000)).subscribe(message => {
+messages.pipe(
+  retryWhen(errors => errors.delay(1000))
+).subscribe(message => {
   console.log(message)
 })
 ```
@@ -101,10 +103,10 @@ export interface Connection {
 export interface IWebSocket {
   close(): any
   send(data: string | ArrayBuffer | Blob): any
-  onopen?: (OpenEvent) => any
-  onclose?: (CloseEvent) => any
-  onmessage?: (MessageEvent) => any
-  onerror?: (ErrorEvent) => any
+  onopen?: (event: OpenEvent) => any
+  onclose?: (event: CloseEvent) => any
+  onmessage?: (event: MessageEvent) => any
+  onerror?: (event: ErrorEvent) => any
 }
 
 export declare type WebSocketFactory = (url: string, protocols?: string | string[]) => IWebSocket
@@ -123,9 +125,9 @@ This example shows how to use the `map` operator to handle JSON encoding of outg
 
 ```typescript
 function jsonWebsocketConnect(url: string, input: Observable<object>, protocols?: string | string[]) {
-  const jsonInput = input.map(message => JSON.stringify(message))
+  const jsonInput = input.pipe(map(message => JSON.stringify(message)))
   const { connectionStatus, messages } = websocketConnect(url, jsonInput, protocols)
-  const jsonMessages = messages.map(message => JSON.parse(message))
+  const jsonMessages = messages.pipe(map(message => JSON.parse(message)))
   return { connectionStatus, messages: jsonMessages }
 }
 ```
