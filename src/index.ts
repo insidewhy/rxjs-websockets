@@ -59,6 +59,10 @@ export default function connect(
     }
 
     socket.onclose = (event: CloseEvent) => {
+      // prevent observer.complete() being called after observer.error(...)
+      if (! open)
+        return
+
       closed()
       if (forcedClose)
         observer.complete()
