@@ -103,7 +103,7 @@ export interface Connection {
 export interface IWebSocket {
   close(): any
   send(data: string | ArrayBuffer | Blob): any
-  onopen?: (event: OpenEvent) => any
+  onopen?: (event: Event) => any
   onclose?: (event: CloseEvent) => any
   onmessage?: (event: MessageEvent) => any
   onerror?: (event: ErrorEvent) => any

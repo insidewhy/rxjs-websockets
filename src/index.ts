@@ -8,10 +8,10 @@ export interface Connection {
 export interface IWebSocket {
   close()
   send(data: string | ArrayBuffer | Blob)
-  onopen?: (OpenEvent) => any
-  onclose?: (CloseEvent) => any
-  onmessage?: (MessageEvent) => any
-  onerror?: (ErrorEvent) => any
+  onopen?: (event: Event) => any
+  onclose?: (event: CloseEvent) => any
+  onmessage?: (event: MessageEvent) => any
+  onerror?: (event: ErrorEvent) => any
 }
 
 export type WebSocketFactory = (url: string, protocols?: string | string[]) => IWebSocket
