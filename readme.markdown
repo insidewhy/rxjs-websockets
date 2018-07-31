@@ -19,9 +19,9 @@ An rxjs websocket library with a simple and flexible implementation. Supports th
 Install the dependency:
 
 ```bash
-npm install -S rxjs-websockets
+npm install rxjs-websockets
 # the following dependency is recommended for most users
-npm install -S queueing-subject
+npm install queueing-subject
 ```
 
 ## Simple usage
