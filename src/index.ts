@@ -1,17 +1,18 @@
 import { Observable, Subscription, BehaviorSubject } from 'rxjs'
+import * as WebSocket from 'ws';
 
 export interface Connection {
   connectionStatus: Observable<number>,
-  messages: Observable<string>,
+  messages: Observable<WebSocket.Data>,
 }
 
 export interface IWebSocket {
-  close()
-  send(data: string | ArrayBuffer | Blob)
-  onopen?: (event: Event) => any
-  onclose?: (event: CloseEvent) => any
-  onmessage?: (event: MessageEvent) => any
-  onerror?: (event: ErrorEvent) => any
+  close(): void
+  send(data: WebSocket.Data)
+  onopen?: (event: { target: WebSocket }) => void;
+  onerror?: (event: {error: any, message: string, type: string, target: WebSocket }) => void;
+  onclose?: (event: { wasClean: boolean; code: number; reason: string; target: WebSocket }) => void;
+  onmessage?: (event: { data: WebSocket.Data; type: string; target: WebSocket }) => void;
 }
 
 export type WebSocketFactory = (url: string, protocols?: string | string[]) => IWebSocket
@@ -26,7 +27,7 @@ export default function connect(
 ): Connection {
   const connectionStatus = new BehaviorSubject<number>(0)
 
-  const messages = new Observable<string>(observer => {
+  const messages = new Observable<WebSocket.Data>(observer => {
     const socket = websocketFactory(url, protocols)
     let inputSubscription: Subscription
 
@@ -49,16 +50,16 @@ export default function connect(
       })
     }
 
-    socket.onmessage = (message: MessageEvent) => {
-      observer.next(message.data)
+    socket.onmessage = (event) => {
+      observer.next(event.data)
     }
 
-    socket.onerror = (error: ErrorEvent) => {
+    socket.onerror = (error) => {
       closed()
       observer.error(error)
     }
 
-    socket.onclose = (event: CloseEvent) => {
+    socket.onclose = (event) => {
       // prevent observer.complete() being called after observer.error(...)
       if (! open)
         return
