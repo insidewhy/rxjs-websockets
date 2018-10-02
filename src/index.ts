@@ -16,12 +16,14 @@ export interface IWebSocket {
 
 export type WebSocketFactory = (url: string, protocols?: string | string[]) => IWebSocket
 
-const defaultWebsocketFactory = (url: string, protocol?: string): IWebSocket => new WebSocket(url, protocol)
+const defaultProtocols = [];
+
+const defaultWebsocketFactory: WebSocketFactory = (url: string, protocols: string | string[] = defaultProtocols): IWebSocket => new WebSocket(url, protocols)
 
 export default function connect(
   url: string,
   input: Observable<string>,
-  protocols?: string | string[],
+  protocols: string | string[] = defaultProtocols,
   websocketFactory: WebSocketFactory = defaultWebsocketFactory,
 ): Connection {
   const connectionStatus = new BehaviorSubject<number>(0)
