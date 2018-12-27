@@ -1,6 +1,6 @@
 import { Observable, Subscription, BehaviorSubject } from 'rxjs'
 
-export interface Connection<T> {
+export interface Connection<T extends string | ArrayBuffer | Blob = string | ArrayBuffer | Blob> {
   connectionStatus: Observable<number>,
   messages: Observable<T>,
 }
