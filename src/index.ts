@@ -1,22 +1,16 @@
 import { Observable, Subscription, BehaviorSubject } from 'rxjs'
 
-export interface Connection {
-  connectionStatus: Observable<number>
-  messages: Observable<string>
-}
-
 interface EventWithReason {
   reason: string
 }
 
-interface EventWithData {
-  // TODO: should be
-  // data: string | ArrayBuffer | Blob;
-  data: string
-}
-
 interface EventWithMessage {
   message?: string
+}
+
+export interface Connection<T extends (string | ArrayBuffer | Blob) = (string | ArrayBuffer | Blob)> {
+  connectionStatus: Observable<number>,
+  messages: Observable<T>,
 }
 
 export interface IWebSocket {
@@ -38,15 +32,15 @@ const defaultProtocols = [];
 
 const defaultWebsocketFactory: WebSocketFactory = (url: string, protocols: string | string[] = defaultProtocols): IWebSocket => new WebSocket(url, protocols)
 
-export default function connect(
+export default function connect<T extends (string | ArrayBuffer | Blob) = (string | ArrayBuffer | Blob)>(
   url: string,
-  input: Observable<string>,
+  input: Observable<T>,
   protocols: string | string[] = defaultProtocols,
   websocketFactory: WebSocketFactory = defaultWebsocketFactory,
-): Connection {
+): Connection<T> {
   const connectionStatus = new BehaviorSubject<number>(0)
 
-  const messages = new Observable<string>(observer => {
+  const messages = new Observable<T>(observer => {
     const socket = websocketFactory(url, protocols)
     let inputSubscription: Subscription
 
@@ -69,7 +63,7 @@ export default function connect(
       })
     }
 
-    socket.onmessage = (message: EventWithData) => {
+    socket.onmessage = (message: { data: T }) => {
       observer.next(message.data)
     }
 
