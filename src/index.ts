@@ -20,15 +20,15 @@ const defaultProtocols = [];
 
 const defaultWebsocketFactory: WebSocketFactory = (url: string, protocols: string | string[] = defaultProtocols): IWebSocket => new WebSocket(url, protocols)
 
-export default function connect(
+export default function connect<T extends string | ArrayBuffer | Blob = string | ArrayBuffer | Blob>(
   url: string,
-  input: Observable<string>,
+  input: Observable<T>,
   protocols: string | string[] = defaultProtocols,
   websocketFactory: WebSocketFactory = defaultWebsocketFactory,
 ): Connection {
   const connectionStatus = new BehaviorSubject<number>(0)
 
-  const messages = new Observable<string>(observer => {
+  const messages = new Observable<T>(observer => {
     const socket = websocketFactory(url, protocols)
     let inputSubscription: Subscription
 
