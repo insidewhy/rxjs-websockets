@@ -1,8 +1,8 @@
 import { Observable, Subscription, BehaviorSubject } from 'rxjs'
 
-export interface Connection {
+export interface Connection<T> {
   connectionStatus: Observable<number>,
-  messages: Observable<string>,
+  messages: Observable<T>,
 }
 
 export interface IWebSocket {
@@ -25,7 +25,7 @@ export default function connect<T extends string | ArrayBuffer | Blob = string |
   input: Observable<T>,
   protocols: string | string[] = defaultProtocols,
   websocketFactory: WebSocketFactory = defaultWebsocketFactory,
-): Connection {
+): Connection<T> {
   const connectionStatus = new BehaviorSubject<number>(0)
 
   const messages = new Observable<T>(observer => {
