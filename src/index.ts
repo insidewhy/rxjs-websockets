@@ -1,17 +1,35 @@
 import { Observable, Subscription, BehaviorSubject } from 'rxjs'
 
 export interface Connection {
-  connectionStatus: Observable<number>,
-  messages: Observable<string>,
+  connectionStatus: Observable<number>
+  messages: Observable<string>
+}
+
+interface EventWithReason {
+  reason: string
+}
+
+interface EventWithData {
+  // TODO: should be
+  // data: string | ArrayBuffer | Blob;
+  data: string
+}
+
+interface EventWithMessage {
+  message?: string
 }
 
 export interface IWebSocket {
-  close()
-  send(data: string | ArrayBuffer | Blob)
-  onopen?: (event: Event) => any
-  onclose?: (event: CloseEvent) => any
-  onmessage?: (event: MessageEvent) => any
-  onerror?: (event: ErrorEvent) => any
+  close(): any
+  send(data: string | ArrayBuffer | Blob): any
+
+  // TypeScript doesn't seem to apply function bivariance on each property when
+  // comparing an object to an interface so the argument types have to be `any` :(
+  // Ideally would be able to use the EventWith... interfaces
+  onopen: ((event: any) => any) | null
+  onclose: ((event: any) => any) | null
+  onmessage: ((event: any) => any) | null
+  onerror: ((event: any) => any) | null
 }
 
 export type WebSocketFactory = (url: string, protocols?: string | string[]) => IWebSocket
@@ -51,16 +69,16 @@ export default function connect(
       })
     }
 
-    socket.onmessage = (message: MessageEvent) => {
+    socket.onmessage = (message: EventWithData) => {
       observer.next(message.data)
     }
 
-    socket.onerror = (error: ErrorEvent) => {
+    socket.onerror = (error: EventWithMessage) => {
       closed()
-      observer.error(error)
+      observer.error(new Error(error.message))
     }
 
-    socket.onclose = (event: CloseEvent) => {
+    socket.onclose = (event: EventWithReason) => {
       // prevent observer.complete() being called after observer.error(...)
       if (! open)
         return

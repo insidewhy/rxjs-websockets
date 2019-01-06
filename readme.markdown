@@ -101,12 +101,7 @@ export interface Connection {
 }
 
 export interface IWebSocket {
-  close(): any
-  send(data: string | ArrayBuffer | Blob): any
-  onopen?: (event: Event) => any
-  onclose?: (event: CloseEvent) => any
-  onmessage?: (event: MessageEvent) => any
-  onerror?: (event: ErrorEvent) => any
+  // ...see source code for this definition
 }
 
 export declare type WebSocketFactory = (url: string, protocols?: string | string[]) => IWebSocket

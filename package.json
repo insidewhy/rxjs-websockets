@@ -1,6 +1,6 @@
 {
   "name": "rxjs-websockets",
-  "version": "6.0.3",
+  "version": "6.0.4",
   "description": "rxjs 5 websockets library, ideal for use with angular 2",
   "main": "lib/index.js",
   "typings": "lib/index",
@@ -38,6 +38,6 @@
     "rxjs": "^6.1.0",
     "sinon": "^3.2.1",
     "sinon-chai": "^2.13.0",
-    "typescript": "^2.1.6"
+    "typescript": "^3.2.0"
   }
 }
