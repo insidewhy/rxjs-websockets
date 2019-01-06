@@ -24,6 +24,10 @@ npm install -S rxjs-websockets
 npm install -S queueing-subject
 ```
 
+## Changelog
+
+[Changelog here](changelog.markdown)
+
 ## Simple usage
 
 ```typescript
