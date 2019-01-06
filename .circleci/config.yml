@@ -23,7 +23,7 @@ jobs:
       - run: yarn test
 workflows:
   version: 2
-  build:
+  test:
     jobs:
       - test
 
