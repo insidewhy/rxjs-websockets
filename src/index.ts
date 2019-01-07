@@ -8,14 +8,16 @@ interface EventWithMessage {
   message?: string
 }
 
-export interface Connection<T extends (string | ArrayBuffer | Blob) = (string | ArrayBuffer | Blob)> {
+type WebSocketPayload = string | ArrayBuffer | Blob
+
+export interface Connection<T extends WebSocketPayload = WebSocketPayload> {
   connectionStatus: Observable<number>,
   messages: Observable<T>,
 }
 
 export interface IWebSocket {
   close(): any
-  send(data: string | ArrayBuffer | Blob): any
+  send(data: WebSocketPayload): any
 
   // TypeScript doesn't seem to apply function bivariance on each property when
   // comparing an object to an interface so the argument types have to be `any` :(
@@ -32,9 +34,9 @@ const defaultProtocols = [];
 
 const defaultWebsocketFactory: WebSocketFactory = (url: string, protocols: string | string[] = defaultProtocols): IWebSocket => new WebSocket(url, protocols)
 
-export default function connect<T extends (string | ArrayBuffer | Blob) = (string | ArrayBuffer | Blob)>(
+export default function connect<T extends WebSocketPayload = WebSocketPayload>(
   url: string,
-  input: Observable<T>,
+  input: Observable<WebSocketPayload>,
   protocols: string | string[] = defaultProtocols,
   websocketFactory: WebSocketFactory = defaultWebsocketFactory,
 ): Connection<T> {
