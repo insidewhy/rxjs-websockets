@@ -1,4 +1,4 @@
-import { Observable, Subscription, BehaviorSubject } from 'rxjs'
+import { Observable, Subscription, Subject } from 'rxjs'
 
 interface EventWithReason {
   reason: string
@@ -9,11 +9,6 @@ interface EventWithMessage {
 }
 
 type WebSocketPayload = string | ArrayBuffer | Blob
-
-export interface Connection<T extends WebSocketPayload = WebSocketPayload> {
-  connectionStatus: Observable<number>,
-  messages: Observable<T>,
-}
 
 export interface IWebSocket {
   close(): any
@@ -28,60 +23,68 @@ export interface IWebSocket {
   onerror: ((event: any) => any) | null
 }
 
-export type WebSocketFactory = (url: string, protocols?: string | string[]) => IWebSocket
+export type WebSocketFactory = (url: string, protocols: string | string[]) => IWebSocket
 
-const defaultProtocols = [];
+export type SocketInstanceFactory<T> = (input: Observable<WebSocketPayload>) => Observable<T>
 
-const defaultWebsocketFactory: WebSocketFactory = (url: string, protocols: string | string[] = defaultProtocols): IWebSocket => new WebSocket(url, protocols)
+const defaultProtocols = []
+
+const defaultWebsocketFactory: WebSocketFactory = (
+  url: string,
+  protocols: string | string[],
+): IWebSocket => new WebSocket(url, protocols)
 
 export default function connect<T extends WebSocketPayload = WebSocketPayload>(
   url: string,
-  input: Observable<WebSocketPayload>,
   protocols: string | string[] = defaultProtocols,
   websocketFactory: WebSocketFactory = defaultWebsocketFactory,
-): Connection<T> {
-  const connectionStatus = new BehaviorSubject<number>(0)
+): Observable<SocketInstanceFactory<T>> {
 
-  const messages = new Observable<T>(observer => {
-    const socket = websocketFactory(url, protocols)
+  return new Observable<SocketInstanceFactory<T>>(observer => {
     let inputSubscription: Subscription
+    const messages = new Subject<T>()
 
-    let open = false
-    let forcedClose = false
-
-    const closed = () => {
-      if (! open)
-        return
-
-      connectionStatus.next(connectionStatus.getValue() - 1)
-      open = false
+    const socketMessageFactory: SocketInstanceFactory<T> = (input: Observable<WebSocketPayload>) => {
+      if (inputSubscription) {
+        setClosedStatus()
+        observer.error(new Error('Web socket message factory function called more than once'))
+      } else {
+        inputSubscription = input.subscribe(data => { socket.send(data) })
+        return messages
+      }
     }
 
+    const socket = websocketFactory(url, protocols)
+
+    let isSocketOpen = false
+    let forcedClose = false
+
+    const setClosedStatus = () => { isSocketOpen = false }
+
     socket.onopen = () => {
-      open = true
-      connectionStatus.next(connectionStatus.getValue() + 1)
-      inputSubscription = input.subscribe(data => {
-        socket.send(data)
-      })
+      isSocketOpen = true
+      observer.next(socketMessageFactory)
     }
 
     socket.onmessage = (message: { data: T }) => {
-      observer.next(message.data)
+      messages.next(message.data)
     }
 
     socket.onerror = (error: EventWithMessage) => {
-      closed()
+      setClosedStatus()
       observer.error(new Error(error.message))
     }
 
     socket.onclose = (event: EventWithReason) => {
       // prevent observer.complete() being called after observer.error(...)
-      if (! open)
+      if (! isSocketOpen)
         return
 
-      closed()
-      if (forcedClose)
+      setClosedStatus()
+      if (forcedClose) {
         observer.complete()
+        messages.complete()
+      }
       else
         observer.error(new Error(event.reason))
     }
@@ -91,12 +94,10 @@ export default function connect<T extends WebSocketPayload = WebSocketPayload>(
       if (inputSubscription)
         inputSubscription.unsubscribe()
 
-      if (open) {
-        closed()
+      if (isSocketOpen) {
+        setClosedStatus()
         socket.close()
       }
     }
   })
-
-  return { messages, connectionStatus }
 }
