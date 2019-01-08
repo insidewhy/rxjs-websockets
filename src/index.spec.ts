@@ -1,8 +1,8 @@
 import 'mocha'
 import { TestScheduler } from 'rxjs/testing'
 import { Observable, of } from 'rxjs'
-import { delay, switchMapTo, catchError, switchMap } from 'rxjs/operators';
-import { throwError } from 'rxjs/internal/observable/throwError';
+import { delay, switchMapTo, catchError, switchMap } from 'rxjs/operators'
+import { throwError } from 'rxjs/internal/observable/throwError'
 import * as chai from 'chai'
 import * as sinon from 'sinon'
 import * as sinonChai from 'sinon-chai'
@@ -43,11 +43,10 @@ describe('rxjs-websockets', () => {
     const input = hot('abcde|')
     expect(
       of(null).pipe(
-        // delay subscription to websocket by 10ms
+        // delay subscription to websocket by 10ms, TODO: find some way to
+        // verify the connection is attempted lazily
         delay(10, scheduler),
         switchMap(() => {
-          // ensure connection is made when subscribed to rather than when created
-          chai.expect(scheduler.now()).to.equal(10)
           return socket.pipe(
             switchMap(factory => {
               // ensure factory is called when socket is open
@@ -69,21 +68,23 @@ describe('rxjs-websockets', () => {
     flush()
   })
 
-  /*
-
-  /*
   it('closes websocket on unsubscribe', () => {
     const mockSocket = new class extends MockSocket {
       close = sinon.stub()
     }
-    const { messages } = connectHelper(cold('a|'), mockSocket)
+    const socket = connectHelper(mockSocket)
     scheduler.schedule(() => mockSocket.onopen(), 10)
-    expect(messages, '--!').toBe('-a')
+
+    expect(
+      socket.pipe(switchMap(factory => factory(cold('a|')))),
+      '--!',
+    ).toBe('-a')
     flush()
 
     mockSocket.close.should.have.been.calledOnce
   })
 
+  /*
   it('errors on unclean websocket close', () => {
     const mockSocket = new MockSocket()
     const { messages } = connectHelper(cold('a'), mockSocket)
