@@ -1,7 +1,7 @@
 import 'mocha'
 import { TestScheduler } from 'rxjs/testing'
-import { Observable, of } from 'rxjs'
-import { delay, switchMapTo, catchError, switchMap } from 'rxjs/operators'
+import { of } from 'rxjs'
+import { delay, catchError, switchMap } from 'rxjs/operators'
 import { throwError } from 'rxjs/internal/observable/throwError'
 import * as chai from 'chai'
 import * as sinon from 'sinon'
@@ -84,15 +84,18 @@ describe('rxjs-websockets', () => {
     mockSocket.close.should.have.been.calledOnce
   })
 
-  /*
   it('errors on unclean websocket close', () => {
     const mockSocket = new MockSocket()
-    const { messages } = connectHelper(cold('a'), mockSocket)
+    const socket = connectHelper(mockSocket)
     scheduler.schedule(() => mockSocket.onopen(), 10)
     scheduler.schedule(() => mockSocket.onclose({ reason: 'Normal closure' }), 30)
-    expect(messages.pipe(catchError(error => throwError(error.message))))
-      .toBe('-a-#', undefined, 'Normal closure')
+    expect(
+      socket.pipe(
+        switchMap(factory => factory(cold('a'))),
+        // rethrow error as string... can't get expectation to match the error
+        catchError(error => throwError(error.message))
+       ),
+    ).toBe('-a-#', undefined, 'Normal closure')
     flush()
   })
-  */
 })
