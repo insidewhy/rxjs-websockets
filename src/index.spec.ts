@@ -37,29 +37,39 @@ describe('rxjs-websockets', () => {
 
   const connectHelper = (mockSocket, protocols?) => connect('url', protocols, () => mockSocket)
 
-  it('connects to websocket and retrieves data', () => {
+  it('connects to websocket lazily and retrieves data', () => {
     const mockSocket = new MockSocket()
     const socket = connectHelper(mockSocket)
     const input = hot('abcde|')
     expect(
-      socket.pipe(
-        switchMap(factory => factory(input))
+      of(null).pipe(
+        // delay subscription to websocket by 10ms
+        delay(10, scheduler),
+        switchMap(() => {
+          // ensure connection is made when subscribed to rather than when created
+          chai.expect(scheduler.now()).to.equal(10)
+          return socket.pipe(
+            switchMap(factory => {
+              // ensure factory is called when socket is open
+              chai.expect(scheduler.now()).to.equal(20)
+              return factory(input)
+            })
+          )
+        })
       )
-    ).toBe('-bcde')
+    ).toBe('--cde')
 
-    scheduler.schedule(() => mockSocket.onopen(), 10)
+    // websocket opens at 20ms
+    scheduler.schedule(() => {
+      // if one of the expectations raises an error this won't be defined
+      if (mockSocket.onopen)
+        mockSocket.onopen()
+    }, 20)
+
     flush()
   })
 
   /*
-  it('connects to websocket lazily and retrieves data', () => {
-    const mockSocket = new MockSocket()
-    const { connectionStatus, messages } = connectHelper(hot('abcde|'), mockSocket)
-    scheduler.schedule(() => mockSocket.onopen(), 15)
-    expect(of(null).pipe(delay(14, scheduler)).pipe(switchMapTo(messages))).toBe('--cde')
-    flush()
-  })
-  */
 
   /*
   it('closes websocket on unsubscribe', () => {

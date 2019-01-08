@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "build": "tsc -p src",
-    "build:watch": "tsc -w -p src",
+    "build:watch": "tsc -w --preserveWatchOutput -p src",
     "test": "npm run build && npm run mocha",
     "watch": "concurrently 'npm run build:watch' 'npm run mocha:watch'",
     "prepare": "npm run build",
