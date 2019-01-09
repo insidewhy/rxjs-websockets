@@ -97,4 +97,8 @@ describe('rxjs-websockets', () => {
     ).toBe('-a-#', undefined, 'Normal closure')
     flush()
   })
+
+  xit('raises Error with normalClosureMessage when socket was closed normally', () => {
+    // TODO:
+  });
 })

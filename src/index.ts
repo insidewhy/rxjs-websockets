@@ -1,6 +1,7 @@
 import { Observable, Subscription, Subject } from 'rxjs'
 
-interface EventWithReason {
+interface EventWithCodeAndReason {
+  code: number
   reason: string
 }
 
@@ -40,6 +41,8 @@ export interface WebSocketOptions {
   protocols: string | string[]
   makeWebSocket: WebSocketFactory
 }
+
+export const normalClosureMessage = 'Normal closure'
 
 export default function makeWebSocketObservable<T extends WebSocketPayload = WebSocketPayload>(
   url: string,
@@ -84,7 +87,7 @@ export default function makeWebSocketObservable<T extends WebSocketPayload = Web
       observer.error(new Error(error.message))
     }
 
-    socket.onclose = (event: EventWithReason) => {
+    socket.onclose = (event: EventWithCodeAndReason) => {
       // prevent observer.complete() being called after observer.error(...)
       if (! isSocketOpen)
         return
@@ -94,8 +97,9 @@ export default function makeWebSocketObservable<T extends WebSocketPayload = Web
         observer.complete()
         messages.complete()
       }
-      else
-        observer.error(new Error(event.reason))
+      else {
+        observer.error(new Error(event.code === 1000 ? normalClosureMessage : event.reason))
+      }
     }
 
     return () => {

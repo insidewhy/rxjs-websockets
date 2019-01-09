@@ -36,6 +36,7 @@ import makeWebSocketObservable, {
   GetWebSocketResponses,
   // WebSocketPayload = string | ArrayBuffer | Blob
   WebSocketPayload,
+  normalClosureMessage,
 } from 'rxjs-websockets'
 
 // this subject queues as necessary to ensure every message is delivered
@@ -65,10 +66,18 @@ const messagesSubscription: Subscription = messages.subscribe(
     input$.next('i got your message')
   },
   (error: Error) => {
-    console.log('an error occurred and the socket was disconnected', error)
+    const { message } = error
+    if (message === normalClosureMessage) {
+      console.log('server closed the websocket connection normally')
+    } else {
+      console.log('socket was disconnected due to error:', message)
+    }
   },
   () => {
-    console.log('the connection was closed cleanly')
+    // The clean termination only happens in response to the last
+    // subscription to the observable being unsubscribed, any
+    // other closure is considered an error.
+    console.log('the connection was closed in response to the user')
   },
 )
 
