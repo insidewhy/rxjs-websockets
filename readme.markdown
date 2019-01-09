@@ -118,18 +118,19 @@ const messages$ = socket$.pipe(
 A custom websocket factory function can be supplied that takes a URL and returns an object that is compatible with WebSocket:
 
 ```typescript
-const socket$ = makeWebSocketObservable(
-  'ws://127.0.0.1:4201/ws',
-  {
-    // this is used to create the websocket compatible object,
-    // the default is shown here
-    makeWebSocket: (url: string, protocols: string | string[]) =>
-      new WebSocket(url, protocols),
+import makeWebSocketObservable, { WebSocketOptions } from 'rxjs-websockets'
 
-    // optional argument, passed to `makeWebSocket`
-    // protocols: '...',
-  }
-)
+const options: WebSocketOptions = {
+  // this is used to create the websocket compatible object,
+  // the default is shown here
+  makeWebSocket: (url: string, protocols: string | string[]) =>
+    new WebSocket(url, protocols),
+
+  // optional argument, passed to `makeWebSocket`
+  // protocols: '...',
+}
+
+const socket$ = makeWebSocketObservable('ws://127.0.0.1:4201/ws', options)
 ```
 
 ## JSON messages and responses
@@ -137,11 +138,14 @@ const socket$ = makeWebSocketObservable(
 This example shows how to use the `map` operator to handle JSON encoding of outgoing messages and parsing of responses:
 
 ```typescript
+import { Observable } from 'rxjs'
+import makeWebSocketObservable, { WebSocketOptions } from 'rxjs-websockets'
+
 function makeJsonWebSocketObservable(
   url: string,
-  protocols?: string | string[],
-): Observable<any> {
-  const socket$ = makeWebSocketObservable<string>(url, { protocols })
+  options?: WebSocketOptions,
+): Observable<unknown> {
+  const socket$ = makeWebSocketObservable<string>(url, options)
   return socket$.pipe(
     map(
       (getResponses: GetWebSocketReponses<string>) =>

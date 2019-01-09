@@ -36,15 +36,17 @@ const defaultWebsocketFactory: WebSocketFactory = (
   protocols: string | string[],
 ): IWebSocket => new WebSocket(url, protocols)
 
-export default function connect<T extends WebSocketPayload = WebSocketPayload>(
+export interface WebSocketOptions {
+  protocols: string | string[]
+  makeWebSocket: WebSocketFactory
+}
+
+export default function makeWebSocketObservable<T extends WebSocketPayload = WebSocketPayload>(
   url: string,
   {
     protocols = defaultProtocols,
     makeWebSocket = defaultWebsocketFactory
-  }: {
-    protocols: string | string[]
-    makeWebSocket: WebSocketFactory
-  },
+  }: WebSocketOptions,
 ): Observable<GetWebSocketResponses<T>> {
 
   return new Observable<GetWebSocketResponses<T>>(observer => {
