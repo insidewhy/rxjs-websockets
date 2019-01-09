@@ -9,7 +9,7 @@ An rxjs websocket library with a simple and flexible implementation. Supports th
  * [observable-socket](https://github.com/killtheliterate/observable-socket)
    * observable-socket provides an input subject for the user, rxjs-websockets allows the user to supply the input stream as a parameter to allow the user to select an observable with semantics appropriate for their own use case ([queueing-subject](https://github.com/ohjames/queueing-subject) can be used to achieve the same semantics as observable-socket).
    * With observable-socket the WebSocket object must be used and managed by the user, rxjs-websocket manages the WebSocket(s) for the user lazily according to subscriptions to the messages observable.
-   * With observable-socket the WebSocket object must be observed using plain old events to detect the connection status, rxjs-websockets provides the connection status as an observable.
+   * With observable-socket the WebSocket object must be observed using plain old events to detect the connection status, rxjs-websockets presents the connection status through observables.
  * [rxjs built-in websocket subject](https://github.com/ReactiveX/rxjs/blob/next/src/observable/dom/webSocket.ts)
    * Implemented as a Subject so lacks the flexibility that rxjs-websockets and observable-socket provide.
    * Does not provide any ability to monitor the web socket connection state.
@@ -41,6 +41,10 @@ import makeWebSocketObservable, {
 // this subject queues as necessary to ensure every message is delivered
 const input$ = new QueueingSubject<string>()
 
+// queue up a request to be sent when the websocket connects, if Subject
+// was used instead of QueueingSubject this request would not be delivered
+input$.next('some data')
+
 // create the websocket observable, does *not* open the websocket connection
 const socket$ = makeWebSocketObservable('ws://localhost/websocket-path')
 
@@ -53,9 +57,6 @@ const messages$: Observable<WebSocketPayload> = socket$.pipe(
   }),
   share(),
 )
-
-// send data to the server
-input$.next('some data')
 
 // the websocket connection is created during the `subscribe` call.
 const messagesSubscription: Subscription = messages.subscribe(
@@ -72,7 +73,7 @@ const messagesSubscription: Subscription = messages.subscribe(
 )
 
 function closeWebsocket() {
-  // this closes the websocket
+  // this also closes the websocket
   messagesSubscription.unsubscribe()
 }
 
@@ -80,6 +81,18 @@ setTimeout(closeWebsocket, 2000)
 ```
 
 The observable returned by `makeWebSocketObservable` is cold, this means the websocket connection is attempted lazily as subscriptions are made to it. Advanced users of this library will find it important to understand the distinction between [hot and cold observables](https://blog.thoughtram.io/angular/2016/06/16/cold-vs-hot-observables.html), for most it will be sufficient to use the [share operator](http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-share) as shown in the example above. The `share` operator ensures at most one websocket connection is attempted regardless of the number of subscriptions to the observable while ensuring the socket is closed when the last subscription is unsubscribed. When only one subscription is made the operator has no effect.
+
+By default the websocket supports binary messages so the payload type is `string | ArrayBuffer | Blob`, when you only need `string` messages the generic parameter to `makeWebSocketObservable` can be used:
+
+```typescript
+const socket$ = makeWebSocketObservable<string>('ws://localhost/websocket-path')
+const input$ = new QueueingSubject<string>()
+
+const messages$: Observable<string> = socket$.pipe(
+  switchMap((getResponses: GetWebSocketResponses<string>) => getResponses(input$)),
+  share(),
+)
+```
 
 ## Reconnecting on failure
 
@@ -113,7 +126,7 @@ const socket$ = makeWebSocketObservable(
   undefined,
 
   // this is the factory
-  (url, protocols) => new WebSocket(url, protocols)
+  (url, protocols) => new WebSocket(url, protocols),
 )
 ```
 
@@ -125,17 +138,17 @@ This example shows how to use the `map` operator to handle JSON encoding of outg
 function makeJsonWebSocketObservable(
   url: string,
   protocols?: string | string[]
-) {
-  const socket$ = makeWebSocketObservable(url, protocols)
+): Observable<string> {
+  const socket$ = makeWebSocketObservable<string>(url, protocols)
   return socket$.pipe(
     map(
       getResponses => input$ => getResponses(
         input$.pipe(
-          map(request => JSON.stringify(request))
+          map(request => JSON.stringify(request)),
         ),
       ).pipe(
         map(response => JSON.parse(response)),
-      )
+      ),
     ),
   )
 }
