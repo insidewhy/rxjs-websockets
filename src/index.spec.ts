@@ -7,7 +7,7 @@ import * as chai from 'chai'
 import * as sinon from 'sinon'
 import * as sinonChai from 'sinon-chai'
 
-import connect from '.'
+import connect, { normalClosureMessage } from '.'
 
 chai.use(sinonChai)
 const { expect } = chai
@@ -83,22 +83,29 @@ describe('rxjs-websockets', () => {
     expect(mockSocket.close).to.have.been.calledOnce
   })
 
-  it('errors on unclean websocket close', () => {
-    const mockSocket = new MockSocket()
-    const socket = connectHelper(mockSocket)
-    scheduler.schedule(() => mockSocket.onopen(), 10)
-    scheduler.schedule(() => mockSocket.onclose({ reason: 'Normal closure' }), 30)
-    expect$(
-      socket.pipe(
-        switchMap(factory => factory(cold('a'))),
-        // rethrow error as string... can't get expectation to match the error
-        catchError(error => throwError(error.message))
-       ),
-    ).toBe('-a-#', undefined, 'Normal closure')
-    flush()
-  })
+  describe('raises Error', () => {
+    const runTest = (reason: string, code: number, expectedReason: string) => {
+      const mockSocket = new MockSocket()
+      const socket = connectHelper(mockSocket)
+      scheduler.schedule(() => mockSocket.onopen(), 10)
+      scheduler.schedule(() => mockSocket.onclose({ reason, code }), 30)
+      expect$(
+        socket.pipe(
+          switchMap(factory => factory(cold('a'))),
+          // rethrow error as string... can't get expectation to match the error
+          catchError(error => throwError(error.message))
+        ),
+      ).toBe('-a-#', undefined, expectedReason)
+      flush()
+    }
 
-  xit('raises Error with normalClosureMessage when socket was closed normally', () => {
-    // TODO:
-  });
+    it('with message equal to reason on unclean websocket close', () => {
+      const reason = 'Freakish closure'
+      runTest(reason, 9000, reason)
+    })
+
+    it('with normalClosureMessage when socket was closed normally', () => {
+      runTest('whatever', 1000, normalClosureMessage)
+    });
+  })
 })
