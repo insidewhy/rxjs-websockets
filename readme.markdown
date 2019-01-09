@@ -30,7 +30,7 @@ yarn add rxjs-websockets
 
 ```typescript
 import { QueueingSubject } from 'queueing-subject'
-import { switchMap } from 'rxjs/operators'
+import { share, switchMap } from 'rxjs/operators'
 import websocketConnect from 'rxjs-websockets'
 
 // this subject queues as necessary to ensure every message is delivered
@@ -45,7 +45,8 @@ const messages$ = socket$.pipe(
     // called but when socket$ is subscribed to.
     console.log('connected to websocket')
     return getResponses(input$)
-  })
+  }),
+  share(),
 )
 
 // send data to the server
@@ -73,7 +74,9 @@ function closeWebsocket() {
 setTimeout(closeWebsocket, 2000)
 ```
 
-`messages` is a cold observable, this means the websocket connection is attempted lazily when a subscription is made to the `messages` observable. Advanced users of this library will find it important to understand the distinction between [hot and cold observables](https://blog.thoughtram.io/angular/2016/06/16/cold-vs-hot-observables.html), for most it will be sufficient to use the [share operator](http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-share) as shown in the Angular example below.
+The observable returned by `websocketConnect` iis cold, this means the websocket connection is attempted lazily as subscriptions are made to it. Advanced users of this library will find it important to understand the distinction between [hot and cold observables](https://blog.thoughtram.io/angular/2016/06/16/cold-vs-hot-observables.html), for most it will be sufficient to use the [share operator](http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-share) as shown in the Angular example below.
+
+The `share` operator is used to ensures at most one websocket connection is attempted regardless of the number of subscriptions to the observable. If only one subscription is made then the operator would have no effect.
 
 ## Reconnecting on failure
 
