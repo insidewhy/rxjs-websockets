@@ -1,7 +1,7 @@
 {
   "name": "rxjs-websockets",
-  "version": "6.0.4",
-  "description": "rxjs 5 websockets library, ideal for use with angular 2",
+  "version": "7.0.0-beta.1",
+  "description": "rxjs 6 websockets library",
   "main": "lib/index.js",
   "typings": "lib/index",
   "repository": {
@@ -9,13 +9,18 @@
     "url": "git://github.com/ohjames/rxjs-websockets.git"
   },
   "keywords": [
+    "angular",
     "angular2",
+    "redux",
+    "redux-observable",
     "rxjs",
-    "websocket"
+    "vuex",
+    "websocket",
+    "websockets"
   ],
   "scripts": {
     "build": "tsc -p src",
-    "build:watch": "tsc -w -p src",
+    "build:watch": "tsc -w --preserveWatchOutput -p src",
     "test": "npm run build && npm run mocha",
     "watch": "concurrently 'npm run build:watch' 'npm run mocha:watch'",
     "prepare": "npm run build",
@@ -28,16 +33,16 @@
     "rxjs": "^6.1.0"
   },
   "devDependencies": {
-    "@types/chai": "^4.0.1",
-    "@types/mocha": "^2.2.41",
-    "@types/sinon": "^2.3.3",
-    "@types/sinon-chai": "^2.7.28",
-    "chai": "^4.1.0",
-    "concurrently": "^3.5.0",
-    "mocha": "^3.4.2",
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.5",
+    "@types/sinon": "^7.0.3",
+    "@types/sinon-chai": "^3.2.2",
+    "chai": "^4.2.0",
+    "concurrently": "^4.1.0",
+    "mocha": "^5.2.0",
     "rxjs": "^6.1.0",
-    "sinon": "^3.2.1",
-    "sinon-chai": "^2.13.0",
+    "sinon": "^7.2.2",
+    "sinon-chai": "^3.3.0",
     "typescript": "^3.2.0"
   }
 }

@@ -1,27 +1,19 @@
-import { Observable, Subscription, BehaviorSubject } from 'rxjs'
+import { Observable, Subscription, Subject } from 'rxjs'
 
-export interface Connection {
-  connectionStatus: Observable<number>
-  messages: Observable<string>
-}
-
-interface EventWithReason {
+interface EventWithCodeAndReason {
+  code: number
   reason: string
-}
-
-interface EventWithData {
-  // TODO: should be
-  // data: string | ArrayBuffer | Blob;
-  data: string
 }
 
 interface EventWithMessage {
   message?: string
 }
 
+type WebSocketPayload = string | ArrayBuffer | Blob
+
 export interface IWebSocket {
   close(): any
-  send(data: string | ArrayBuffer | Blob): any
+  send(data: WebSocketPayload): any
 
   // TypeScript doesn't seem to apply function bivariance on each property when
   // comparing an object to an interface so the argument types have to be `any` :(
@@ -32,62 +24,82 @@ export interface IWebSocket {
   onerror: ((event: any) => any) | null
 }
 
-export type WebSocketFactory = (url: string, protocols?: string | string[]) => IWebSocket
+export type WebSocketFactory = (url: string, protocols: string | string[]) => IWebSocket
 
-const defaultProtocols = [];
+export type GetWebSocketResponses<T = WebSocketPayload> = (
+  input: Observable<WebSocketPayload>
+) => Observable<T>
 
-const defaultWebsocketFactory: WebSocketFactory = (url: string, protocols: string | string[] = defaultProtocols): IWebSocket => new WebSocket(url, protocols)
+const defaultProtocols = []
 
-export default function connect(
+const defaultWebsocketFactory: WebSocketFactory = (
   url: string,
-  input: Observable<string>,
-  protocols: string | string[] = defaultProtocols,
-  websocketFactory: WebSocketFactory = defaultWebsocketFactory,
-): Connection {
-  const connectionStatus = new BehaviorSubject<number>(0)
+  protocols: string | string[],
+): IWebSocket => new WebSocket(url, protocols)
 
-  const messages = new Observable<string>(observer => {
-    const socket = websocketFactory(url, protocols)
+export interface WebSocketOptions {
+  protocols: string | string[]
+  makeWebSocket: WebSocketFactory
+}
+
+export const normalClosureMessage = 'Normal closure'
+
+export default function makeWebSocketObservable<T extends WebSocketPayload = WebSocketPayload>(
+  url: string,
+  {
+    protocols = defaultProtocols,
+    makeWebSocket = defaultWebsocketFactory
+  }: WebSocketOptions,
+): Observable<GetWebSocketResponses<T>> {
+
+  return new Observable<GetWebSocketResponses<T>>(observer => {
     let inputSubscription: Subscription
+    const messages = new Subject<T>()
 
-    let open = false
+    const getWebSocketResponses: GetWebSocketResponses<T> = (input: Observable<WebSocketPayload>) => {
+      if (inputSubscription) {
+        setClosedStatus()
+        observer.error(new Error('Web socket message factory function called more than once'))
+      } else {
+        inputSubscription = input.subscribe(data => { socket.send(data) })
+        return messages
+      }
+    }
+
+    const socket = makeWebSocket(url, protocols)
+
+    let isSocketOpen = false
     let forcedClose = false
 
-    const closed = () => {
-      if (! open)
-        return
-
-      connectionStatus.next(connectionStatus.getValue() - 1)
-      open = false
-    }
+    const setClosedStatus = () => { isSocketOpen = false }
 
     socket.onopen = () => {
-      open = true
-      connectionStatus.next(connectionStatus.getValue() + 1)
-      inputSubscription = input.subscribe(data => {
-        socket.send(data)
-      })
+      isSocketOpen = true
+      observer.next(getWebSocketResponses)
     }
 
-    socket.onmessage = (message: EventWithData) => {
-      observer.next(message.data)
+    socket.onmessage = (message: { data: T }) => {
+      messages.next(message.data)
     }
 
     socket.onerror = (error: EventWithMessage) => {
-      closed()
+      setClosedStatus()
       observer.error(new Error(error.message))
     }
 
-    socket.onclose = (event: EventWithReason) => {
+    socket.onclose = (event: EventWithCodeAndReason) => {
       // prevent observer.complete() being called after observer.error(...)
-      if (! open)
+      if (! isSocketOpen)
         return
 
-      closed()
-      if (forcedClose)
+      setClosedStatus()
+      if (forcedClose) {
         observer.complete()
-      else
-        observer.error(new Error(event.reason))
+        messages.complete()
+      }
+      else {
+        observer.error(new Error(event.code === 1000 ? normalClosureMessage : event.reason))
+      }
     }
 
     return () => {
@@ -95,12 +107,10 @@ export default function connect(
       if (inputSubscription)
         inputSubscription.unsubscribe()
 
-      if (open) {
-        closed()
+      if (isSocketOpen) {
+        setClosedStatus()
         socket.close()
       }
     }
   })
-
-  return { messages, connectionStatus }
 }

@@ -9,19 +9,17 @@ An rxjs websocket library with a simple and flexible implementation. Supports th
  * [observable-socket](https://github.com/killtheliterate/observable-socket)
    * observable-socket provides an input subject for the user, rxjs-websockets allows the user to supply the input stream as a parameter to allow the user to select an observable with semantics appropriate for their own use case ([queueing-subject](https://github.com/ohjames/queueing-subject) can be used to achieve the same semantics as observable-socket).
    * With observable-socket the WebSocket object must be used and managed by the user, rxjs-websocket manages the WebSocket(s) for the user lazily according to subscriptions to the messages observable.
-   * With observable-socket the WebSocket object must be observed using plain old events to detect the connection status, rxjs-websockets provides the connection status as an observable.
+   * With observable-socket the WebSocket object must be observed using plain old events to detect the connection status, rxjs-websockets presents the connection status through observables.
  * [rxjs built-in websocket subject](https://github.com/ReactiveX/rxjs/blob/next/src/observable/dom/webSocket.ts)
    * Implemented as a Subject so lacks the flexibility that rxjs-websockets and observable-socket provide.
    * Does not provide any ability to monitor the web socket connection state.
 
 ## Installation
 
-Install the dependency:
-
 ```bash
 npm install -S rxjs-websockets
-# the following dependency is recommended for most users
-npm install -S queueing-subject
+# or
+yarn add rxjs-websockets
 ```
 
 ## Changelog
@@ -32,53 +30,94 @@ npm install -S queueing-subject
 
 ```typescript
 import { QueueingSubject } from 'queueing-subject'
-import websocketConnect from 'rxjs-websockets'
+import { Subscription } from 'rxjs'
+import { share, switchMap } from 'rxjs/operators'
+import makeWebSocketObservable, {
+  GetWebSocketResponses,
+  // WebSocketPayload = string | ArrayBuffer | Blob
+  WebSocketPayload,
+  normalClosureMessage,
+} from 'rxjs-websockets'
 
 // this subject queues as necessary to ensure every message is delivered
-const input = new QueueingSubject<string>()
+const input$ = new QueueingSubject<string>()
 
-// this method returns an object which contains two observables
-const { messages, connectionStatus } = websocketConnect('ws://localhost/websocket-path', input)
+// queue up a request to be sent when the websocket connects
+input$.next('some data')
 
-// send data to the server
-input.next('some data')
+// create the websocket observable, does *not* open the websocket connection
+const socket$ = makeWebSocketObservable('ws://localhost/websocket-path')
 
-// the connectionStatus stream will provides the current number of websocket
-// connections immediately to each new observer and updates as it changes
-const connectionStatusSubscription = connectionStatus.subscribe(numberConnected => {
-  console.log('number of connected websockets:', numberConnected)
-})
+const messages$: Observable<WebSocketPayload> = socket$.pipe(
+  // the observable produces a value once the websocket has been opened
+  switchMap((getResponses: GetWebSocketResponses) => {
+    console.log('websocket opened')
+    return getResponses(input$)
+  }),
+  share(),
+)
 
-// the websocket connection is created lazily when the messages observable is
-// subscribed to
-const messagesSubscription = messages.subscribe((message: string) => {
-  console.log('received message:', message)
-})
+const messagesSubscription: Subscription = messages.subscribe(
+  (message: string) => {
+    console.log('received message:', message)
+    // respond to server
+    input$.next('i got your message')
+  },
+  (error: Error) => {
+    const { message } = error
+    if (message === normalClosureMessage) {
+      console.log('server closed the websocket connection normally')
+    } else {
+      console.log('socket was disconnected due to error:', message)
+    }
+  },
+  () => {
+    // The clean termination only happens in response to the last
+    // subscription to the observable being unsubscribed, any
+    // other closure is considered an error.
+    console.log('the connection was closed in response to the user')
+  },
+)
 
-// this will close the websocket
-messagesSubscription.unsubscribe()
+function closeWebsocket() {
+  // this also caused the websocket connection to be closed
+  messagesSubscription.unsubscribe()
+}
 
-// closing the websocket does not close the connection status observable, it
-// can be used to monitor future connection status changes
-connectionStatusSubscription.unsubscribe()
+setTimeout(closeWebsocket, 2000)
 ```
 
-`messages` is a cold observable, this means the websocket connection is attempted lazily when a subscription is made to the `messages` observable. Advanced users of this library will find it important to understand the distinction between [hot and cold observables](https://blog.thoughtram.io/angular/2016/06/16/cold-vs-hot-observables.html), for most it will be sufficient to use the [share operator](http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-share) as shown in the Angular example below.
+The observable returned by `makeWebSocketObservable` is cold, this means the websocket connection is attempted lazily as subscriptions are made to it. Advanced users of this library will find it important to understand the distinction between [hot and cold observables](https://blog.thoughtram.io/angular/2016/06/16/cold-vs-hot-observables.html), for most it will be sufficient to use the [share operator](http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-share) as shown in the example above. The `share` operator ensures at most one websocket connection is attempted regardless of the number of subscriptions to the observable while ensuring the socket is closed when the last subscription is unsubscribed. When only one subscription is made the operator has no effect.
 
-## Reconnecting on failure
-
-This can be done with built-in rxjs operators:
+By default the websocket supports binary messages so the payload type is `string | ArrayBuffer | Blob`, when you only need `string` messages the generic parameter to `makeWebSocketObservable` can be used:
 
 ```typescript
-const input = new QueueingSubject<string>()
-const { messages, connectionStatus } = websocketConnect(`ws://server`, input)
+const socket$ = makeWebSocketObservable<string>('ws://localhost/websocket-path')
+const input$ = new QueueingSubject<string>()
 
-// try to reconnect every second
-messages.pipe(
-  retryWhen(errors => errors.delay(1000))
-).subscribe(message => {
-  console.log(message)
-})
+const messages$: Observable<string> = socket$.pipe(
+  switchMap((getResponses: GetWebSocketResponses<string>) => getResponses(input$)),
+  share(),
+)
+```
+
+## Reconnecting on unexpected connection closures
+
+This can be done with the built-in rxjs operator `retryWhen`:
+
+```typescript
+import { Subject } from 'rxjs'
+import { switchMap, retryWhen } from 'rxjs/operators'
+import makeWebSocketObservable from 'rxjs-websockets'
+
+const input$ = new Subject<string>()
+
+const socket$ = makeWebSocketObservable('ws://localhost/websocket-path')
+
+const messages$ = socket$.pipe(
+  switchMap(getResponses => getResponses(input$)),
+  retryWhen(errors => errors.pipe(delay(1000))),
+)
 ```
 
 ## Alternate WebSocket implementations
@@ -86,36 +125,19 @@ messages.pipe(
 A custom websocket factory function can be supplied that takes a URL and returns an object that is compatible with WebSocket:
 
 ```typescript
-const { messages } = websocketConnect(
-  'ws://127.0.0.1:4201/ws',
-  this.inputStream = new QueueingSubject<string>(),
-  undefined,
-  (url, protocols) => new WebSocket(url, protocols)
-)
-```
+import makeWebSocketObservable, { WebSocketOptions } from 'rxjs-websockets'
 
-## Protocols
+const options: WebSocketOptions = {
+  // this is used to create the websocket compatible object,
+  // the default is shown here
+  makeWebSocket: (url: string, protocols?: string | string[]) =>
+    new WebSocket(url, protocols),
 
-The API typings follow which show how to use all features including protocols:
-
-```typescript
-export interface Connection {
-  connectionStatus: Observable<number>
-  messages: Observable<string>
+  // optional argument, passed to `makeWebSocket`
+  // protocols: '...',
 }
 
-export interface IWebSocket {
-  // ...see source code for this definition
-}
-
-export declare type WebSocketFactory = (url: string, protocols?: string | string[]) => IWebSocket
-
-export default function connect(
-  url: string,
-  input: Observable<string>,
-  protocols?: string | string[],
-  websocketFactory?: WebSocketFactory
-): Connection
+const socket$ = makeWebSocketObservable('ws://127.0.0.1:4201/ws', options)
 ```
 
 ## JSON messages and responses
@@ -123,11 +145,28 @@ export default function connect(
 This example shows how to use the `map` operator to handle JSON encoding of outgoing messages and parsing of responses:
 
 ```typescript
-function jsonWebsocketConnect(url: string, input: Observable<object>, protocols?: string | string[]) {
-  const jsonInput = input.pipe(map(message => JSON.stringify(message)))
-  const { connectionStatus, messages } = websocketConnect(url, jsonInput, protocols)
-  const jsonMessages = messages.pipe(map(message => JSON.parse(message)))
-  return { connectionStatus, messages: jsonMessages }
+import { Observable } from 'rxjs'
+import makeWebSocketObservable, { WebSocketOptions } from 'rxjs-websockets'
+
+function makeJsonWebSocketObservable(
+  url: string,
+  options?: WebSocketOptions,
+): Observable<unknown> {
+  const socket$ = makeWebSocketObservable<string>(url, options)
+  return socket$.pipe(
+    map(
+      (getResponses: GetWebSocketReponses<string>) =>
+        (input$: Observable<object>) =>
+          getResponses(
+            input$.pipe(
+              map(request => JSON.stringify(request)),
+            ),
+          ).pipe(
+            map(response => JSON.parse(response)),
+          )
+    ),
+  )
 }
 ```
 
+The function above can be used identically to `makeWebSocketObservable` only the requests/responses will be transparently encoded/decoded.
