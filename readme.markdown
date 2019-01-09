@@ -94,7 +94,7 @@ const messages$: Observable<string> = socket$.pipe(
 )
 ```
 
-## Reconnecting on failure
+## Reconnecting on unexpected connection closures
 
 This can be done with the built-in rxjs operator `retryWhen`:
 
@@ -120,13 +120,15 @@ A custom websocket factory function can be supplied that takes a URL and returns
 ```typescript
 const socket$ = makeWebSocketObservable(
   'ws://127.0.0.1:4201/ws',
+  {
+    // this is used to create the websocket compatible object,
+    // the default is shown here
+    makeWebSocket: (url: string, protocols: string | string[]) =>
+      new WebSocket(url, protocols),
 
-  // the optional protocols argument can be passed here and is forwarded to
-  // the websocket
-  undefined,
-
-  // this is the factory
-  (url, protocols) => new WebSocket(url, protocols),
+    // optional argument, passed to `makeWebSocket`
+    // protocols: '...',
+  }
 )
 ```
 
@@ -137,18 +139,20 @@ This example shows how to use the `map` operator to handle JSON encoding of outg
 ```typescript
 function makeJsonWebSocketObservable(
   url: string,
-  protocols?: string | string[]
-): Observable<string> {
-  const socket$ = makeWebSocketObservable<string>(url, protocols)
+  protocols?: string | string[],
+): Observable<any> {
+  const socket$ = makeWebSocketObservable<string>(url, { protocols })
   return socket$.pipe(
     map(
-      getResponses => input$ => getResponses(
-        input$.pipe(
-          map(request => JSON.stringify(request)),
-        ),
-      ).pipe(
-        map(response => JSON.parse(response)),
-      ),
+      (getResponses: GetWebSocketReponses<string>) =>
+        (input$: Observable<object>) =>
+          getResponses(
+            input$.pipe(
+              map(request => JSON.stringify(request)),
+            ),
+          ).pipe(
+            map(response => JSON.parse(response)),
+          )
     ),
   )
 }

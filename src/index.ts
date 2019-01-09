@@ -38,8 +38,13 @@ const defaultWebsocketFactory: WebSocketFactory = (
 
 export default function connect<T extends WebSocketPayload = WebSocketPayload>(
   url: string,
-  protocols: string | string[] = defaultProtocols,
-  websocketFactory: WebSocketFactory = defaultWebsocketFactory,
+  {
+    protocols = defaultProtocols,
+    makeWebSocket = defaultWebsocketFactory
+  }: {
+    protocols: string | string[]
+    makeWebSocket: WebSocketFactory
+  },
 ): Observable<GetWebSocketResponses<T>> {
 
   return new Observable<GetWebSocketResponses<T>>(observer => {
@@ -56,7 +61,7 @@ export default function connect<T extends WebSocketPayload = WebSocketPayload>(
       }
     }
 
-    const socket = websocketFactory(url, protocols)
+    const socket = makeWebSocket(url, protocols)
 
     let isSocketOpen = false
     let forcedClose = false
