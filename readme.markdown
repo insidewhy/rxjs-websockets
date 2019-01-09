@@ -16,10 +16,10 @@ An rxjs websocket library with a simple and flexible implementation. Supports th
 
 ## Installation
 
-Install the dependency:
-
 ```bash
 npm install -S rxjs-websockets
+# or
+yarn add rxjs-websockets
 ```
 
 ## Changelog
@@ -30,8 +30,8 @@ npm install -S rxjs-websockets
 
 ```typescript
 import { QueueingSubject } from 'queueing-subject'
-import websocketConnect from 'rxjs-websockets'
 import { switchMap } from 'rxjs/operators'
+import websocketConnect from 'rxjs-websockets'
 
 // this subject queues as necessary to ensure every message is delivered
 const input$ = new QueueingSubject<string>()
@@ -40,11 +40,11 @@ const input$ = new QueueingSubject<string>()
 const socket$ = websocketConnect('ws://localhost/websocket-path')
 
 const messages$ = socket$.pipe(
-  switchMap(factory => {
+  switchMap(getResponses => {
     // The connection is attempted lazily, i.e. not when websocketConnect is
     // called but when socket$ is subscribed to.
     console.log('connected to websocket')
-    return factory(input$)
+    return getResponses(input$)
   })
 )
 
@@ -80,16 +80,16 @@ setTimeout(closeWebsocket, 2000)
 This can be done with the built-in rxjs operator `retryWhen`:
 
 ```typescript
-import websocketConnect from 'rxjs-websockets'
 import { Subject } from 'rxjs'
 import { switchMap, retryWhen } from 'rxjs/operators'
+import websocketConnect from 'rxjs-websockets'
 
 const input$ = new Subject<string>()
 
 const socket$ = websocketConnect('ws://localhost/websocket-path')
 
 const messages$ = socket$.pipe(
-  switchMap(factory => factory(input$)),
+  switchMap(getResponses => getResponses(input$)),
   retryWhen(errors => errors.pipe(delay(1000))),
 )
 ```
@@ -124,8 +124,8 @@ function jsonWebsocketConnect(
   const jsonInput$ = input$.pipe(map(message => JSON.stringify(message)))
   const socket$ = websocketConnect(url, protocols)
   return socket$.pipe(
-    map(factory =>
-      input => factory(input).pipe(map(message => JSON.parse(message)))
+    map(getResponses =>
+      input => getResponses(input).pipe(map(message => JSON.parse(message)))
     )
   )
 }
