@@ -20,8 +20,6 @@ Install the dependency:
 
 ```bash
 npm install -S rxjs-websockets
-# the following dependency is recommended for most users
-npm install -S queueing-subject
 ```
 
 ## Changelog
@@ -33,52 +31,59 @@ npm install -S queueing-subject
 ```typescript
 import { QueueingSubject } from 'queueing-subject'
 import websocketConnect from 'rxjs-websockets'
+import { switchMap } from 'rxjs/operators'
 
 // this subject queues as necessary to ensure every message is delivered
-const input = new QueueingSubject<string>()
+const input$ = new QueueingSubject<string>()
 
-// this method returns an object which contains two observables
-const { messages, connectionStatus } = websocketConnect('ws://localhost/websocket-path', input)
+// create the websocket observable, does *not* open the websocket connection
+const socket$ = websocketConnect('ws://localhost/websocket-path')
+
+const messages$ = socket$.pipe(
+  switchMap(factory => {
+    // The connection is attempted lazily, i.e. not when websocketConnect is
+    // called but when socket$ is subscribed to.
+    console.log('connected to websocket')
+    return factory(input$)
+  })
+)
 
 // send data to the server
-input.next('some data')
+input$.next('some data')
 
-// the connectionStatus stream will provides the current number of websocket
-// connections immediately to each new observer and updates as it changes
-const connectionStatusSubscription = connectionStatus.subscribe(numberConnected => {
-  console.log('number of connected websockets:', numberConnected)
-})
-
-// the websocket connection is created lazily when the messages observable is
-// subscribed to
+// the websocket connection is created during the `subscribe` call.
 const messagesSubscription = messages.subscribe((message: string) => {
   console.log('received message:', message)
+  input$.next('i got your message')
 })
 
-// this will close the websocket
-messagesSubscription.unsubscribe()
+function closeWebsocket() {
+  // this closes the websocket
+  messagesSubscription.unsubscribe()
+}
 
-// closing the websocket does not close the connection status observable, it
-// can be used to monitor future connection status changes
-connectionStatusSubscription.unsubscribe()
+setTimeout(closeWebsocket, 2000)
 ```
 
 `messages` is a cold observable, this means the websocket connection is attempted lazily when a subscription is made to the `messages` observable. Advanced users of this library will find it important to understand the distinction between [hot and cold observables](https://blog.thoughtram.io/angular/2016/06/16/cold-vs-hot-observables.html), for most it will be sufficient to use the [share operator](http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-share) as shown in the Angular example below.
 
 ## Reconnecting on failure
 
-This can be done with built-in rxjs operators:
+This can be done with the built-in rxjs operator `retryWhen`:
 
 ```typescript
-const input = new QueueingSubject<string>()
-const { messages, connectionStatus } = websocketConnect(`ws://server`, input)
+import websocketConnect from 'rxjs-websockets'
+import { Subject } from 'rxjs'
+import { switchMap, retryWhen } from 'rxjs/operators'
 
-// try to reconnect every second
-messages.pipe(
-  retryWhen(errors => errors.delay(1000))
-).subscribe(message => {
-  console.log(message)
-})
+const input$ = new Subject<string>()
+
+const socket$ = websocketConnect('ws://localhost/websocket-path')
+
+const messages$ = socket$.pipe(
+  switchMap(factory => factory(input$)),
+  retryWhen(errors => errors.pipe(delay(1000))),
+)
 ```
 
 ## Alternate WebSocket implementations
@@ -86,36 +91,11 @@ messages.pipe(
 A custom websocket factory function can be supplied that takes a URL and returns an object that is compatible with WebSocket:
 
 ```typescript
-const { messages } = websocketConnect(
+const socket$ = websocketConnect(
   'ws://127.0.0.1:4201/ws',
-  this.inputStream = new QueueingSubject<string>(),
   undefined,
   (url, protocols) => new WebSocket(url, protocols)
 )
-```
-
-## Protocols
-
-The API typings follow which show how to use all features including protocols:
-
-```typescript
-export interface Connection {
-  connectionStatus: Observable<number>
-  messages: Observable<string>
-}
-
-export interface IWebSocket {
-  // ...see source code for this definition
-}
-
-export declare type WebSocketFactory = (url: string, protocols?: string | string[]) => IWebSocket
-
-export default function connect(
-  url: string,
-  input: Observable<string>,
-  protocols?: string | string[],
-  websocketFactory?: WebSocketFactory
-): Connection
 ```
 
 ## JSON messages and responses
@@ -123,11 +103,19 @@ export default function connect(
 This example shows how to use the `map` operator to handle JSON encoding of outgoing messages and parsing of responses:
 
 ```typescript
-function jsonWebsocketConnect(url: string, input: Observable<object>, protocols?: string | string[]) {
-  const jsonInput = input.pipe(map(message => JSON.stringify(message)))
-  const { connectionStatus, messages } = websocketConnect(url, jsonInput, protocols)
-  const jsonMessages = messages.pipe(map(message => JSON.parse(message)))
-  return { connectionStatus, messages: jsonMessages }
+function jsonWebsocketConnect(
+  url: string,
+  input$: Observable<object>,
+  protocols?: string | string[]
+) {
+  const jsonInput$ = input$.pipe(map(message => JSON.stringify(message)))
+  const socket$ = websocketConnect(url, protocols)
+  return socket$.pipe(
+    map(factory =>
+      input => factory(input).pipe(map(message => JSON.parse(message)))
+    )
+  )
 }
 ```
 
+The function above can be used identically to `websocketConnect` only the requests/responses will be transparently encoded/decoded.
