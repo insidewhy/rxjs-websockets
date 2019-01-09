@@ -1,7 +1,11 @@
 
 # Changelog
 
-- 2019/01/09 - 7.0.0 - Redesign API to make connection status handling simpler.
+- 2019/01/09 - 7.0.0-beta.1 - Many improvements to API including
+  - Connection status handling is much simpler, everything can be done with a single observable.
+  - Configuration parameters taken as an object instead of arguments, more future proof and self-documenting.
+  - Improved documentation.
+  - Provide reliable way to detect normal WebSocket closures.
 - 2019/01/07 - 7.0.0-alpha.1 - Support binary requests/responses.
 - 2019/01/06 - 6.0.4 - Make WebsocketFactory interface more permissive.
 - 2018/11/15 - 6.0.3 - Fix firefox bug when not specifying protocol.
