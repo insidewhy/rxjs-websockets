@@ -30,18 +30,23 @@ yarn add rxjs-websockets
 
 ```typescript
 import { QueueingSubject } from 'queueing-subject'
+import { Subscription } from 'rxjs'
 import { share, switchMap } from 'rxjs/operators'
-import websocketConnect from 'rxjs-websockets'
+import makeWebSocketObservable, {
+  GetWebSocketResponses,
+  // WebSocketPayload = string | ArrayBuffer | Blob
+  WebSocketPayload,
+} from 'rxjs-websockets'
 
 // this subject queues as necessary to ensure every message is delivered
 const input$ = new QueueingSubject<string>()
 
 // create the websocket observable, does *not* open the websocket connection
-const socket$ = websocketConnect('ws://localhost/websocket-path')
+const socket$ = makeWebSocketObservable('ws://localhost/websocket-path')
 
-const messages$ = socket$.pipe(
-  switchMap(getResponses => {
-    // The connection is attempted lazily, i.e. not when websocketConnect is
+const messages$: Observable<WebSocketPayload> = socket$.pipe(
+  switchMap((getResponses: GetWebSocketResponses) => {
+    // The connection is attempted lazily, i.e. not when makeWebSocketObservable is
     // called but when socket$ is subscribed to.
     console.log('connected to websocket')
     return getResponses(input$)
@@ -53,7 +58,7 @@ const messages$ = socket$.pipe(
 input$.next('some data')
 
 // the websocket connection is created during the `subscribe` call.
-const messagesSubscription = messages.subscribe(
+const messagesSubscription: Subscription = messages.subscribe(
   (message: string) => {
     console.log('received message:', message)
     input$.next('i got your message')
@@ -74,9 +79,7 @@ function closeWebsocket() {
 setTimeout(closeWebsocket, 2000)
 ```
 
-The observable returned by `websocketConnect` iis cold, this means the websocket connection is attempted lazily as subscriptions are made to it. Advanced users of this library will find it important to understand the distinction between [hot and cold observables](https://blog.thoughtram.io/angular/2016/06/16/cold-vs-hot-observables.html), for most it will be sufficient to use the [share operator](http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-share) as shown in the Angular example below.
-
-The `share` operator is used to ensures at most one websocket connection is attempted regardless of the number of subscriptions to the observable. If only one subscription is made then the operator would have no effect.
+The observable returned by `makeWebSocketObservable` is cold, this means the websocket connection is attempted lazily as subscriptions are made to it. Advanced users of this library will find it important to understand the distinction between [hot and cold observables](https://blog.thoughtram.io/angular/2016/06/16/cold-vs-hot-observables.html), for most it will be sufficient to use the [share operator](http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-share) as shown in the example above. The `share` operator ensures at most one websocket connection is attempted regardless of the number of subscriptions to the observable while ensuring the socket is closed when the last subscription is unsubscribed. When only one subscription is made the operator has no effect.
 
 ## Reconnecting on failure
 
@@ -85,11 +88,11 @@ This can be done with the built-in rxjs operator `retryWhen`:
 ```typescript
 import { Subject } from 'rxjs'
 import { switchMap, retryWhen } from 'rxjs/operators'
-import websocketConnect from 'rxjs-websockets'
+import makeWebSocketObservable from 'rxjs-websockets'
 
 const input$ = new Subject<string>()
 
-const socket$ = websocketConnect('ws://localhost/websocket-path')
+const socket$ = makeWebSocketObservable('ws://localhost/websocket-path')
 
 const messages$ = socket$.pipe(
   switchMap(getResponses => getResponses(input$)),
@@ -102,7 +105,7 @@ const messages$ = socket$.pipe(
 A custom websocket factory function can be supplied that takes a URL and returns an object that is compatible with WebSocket:
 
 ```typescript
-const socket$ = websocketConnect(
+const socket$ = makeWebSocketObservable(
   'ws://127.0.0.1:4201/ws',
 
   // the optional protocols argument can be passed here and is forwarded to
@@ -119,19 +122,23 @@ const socket$ = websocketConnect(
 This example shows how to use the `map` operator to handle JSON encoding of outgoing messages and parsing of responses:
 
 ```typescript
-function jsonWebsocketConnect(
+function makeJsonWebSocketObservable(
   url: string,
-  input$: Observable<object>,
   protocols?: string | string[]
 ) {
-  const jsonInput$ = input$.pipe(map(message => JSON.stringify(message)))
-  const socket$ = websocketConnect(url, protocols)
+  const socket$ = makeWebSocketObservable(url, protocols)
   return socket$.pipe(
-    map(getResponses =>
-      input => getResponses(input).pipe(map(message => JSON.parse(message)))
-    )
+    map(
+      getResponses => input$ => getResponses(
+        input$.pipe(
+          map(request => JSON.stringify(request))
+        ),
+      ).pipe(
+        map(response => JSON.parse(response)),
+      )
+    ),
   )
 }
 ```
 
-The function above can be used identically to `websocketConnect` only the requests/responses will be transparently encoded/decoded.
+The function above can be used identically to `makeWebSocketObservable` only the requests/responses will be transparently encoded/decoded.

@@ -25,7 +25,9 @@ export interface IWebSocket {
 
 export type WebSocketFactory = (url: string, protocols: string | string[]) => IWebSocket
 
-export type SocketInstanceFactory<T> = (input: Observable<WebSocketPayload>) => Observable<T>
+export type GetWebSocketResponses<T = WebSocketPayload> = (
+  input: Observable<WebSocketPayload>
+) => Observable<T>
 
 const defaultProtocols = []
 
@@ -38,13 +40,13 @@ export default function connect<T extends WebSocketPayload = WebSocketPayload>(
   url: string,
   protocols: string | string[] = defaultProtocols,
   websocketFactory: WebSocketFactory = defaultWebsocketFactory,
-): Observable<SocketInstanceFactory<T>> {
+): Observable<GetWebSocketResponses<T>> {
 
-  return new Observable<SocketInstanceFactory<T>>(observer => {
+  return new Observable<GetWebSocketResponses<T>>(observer => {
     let inputSubscription: Subscription
     const messages = new Subject<T>()
 
-    const socketMessageFactory: SocketInstanceFactory<T> = (input: Observable<WebSocketPayload>) => {
+    const getWebSocketResponses: GetWebSocketResponses<T> = (input: Observable<WebSocketPayload>) => {
       if (inputSubscription) {
         setClosedStatus()
         observer.error(new Error('Web socket message factory function called more than once'))
@@ -63,7 +65,7 @@ export default function connect<T extends WebSocketPayload = WebSocketPayload>(
 
     socket.onopen = () => {
       isSocketOpen = true
-      observer.next(socketMessageFactory)
+      observer.next(getWebSocketResponses)
     }
 
     socket.onmessage = (message: { data: T }) => {
