@@ -42,27 +42,25 @@ import makeWebSocketObservable, {
 // this subject queues as necessary to ensure every message is delivered
 const input$ = new QueueingSubject<string>()
 
-// queue up a request to be sent when the websocket connects, if Subject
-// was used instead of QueueingSubject this request would not be delivered
+// queue up a request to be sent when the websocket connects
 input$.next('some data')
 
 // create the websocket observable, does *not* open the websocket connection
 const socket$ = makeWebSocketObservable('ws://localhost/websocket-path')
 
 const messages$: Observable<WebSocketPayload> = socket$.pipe(
+  // the observable produces a value once the websocket has been opened
   switchMap((getResponses: GetWebSocketResponses) => {
-    // The connection is attempted lazily, i.e. not when makeWebSocketObservable is
-    // called but when socket$ is subscribed to.
-    console.log('connected to websocket')
+    console.log('websocket opened')
     return getResponses(input$)
   }),
   share(),
 )
 
-// the websocket connection is created during the `subscribe` call.
 const messagesSubscription: Subscription = messages.subscribe(
   (message: string) => {
     console.log('received message:', message)
+    // respond to server
     input$.next('i got your message')
   },
   (error: Error) => {
@@ -82,7 +80,7 @@ const messagesSubscription: Subscription = messages.subscribe(
 )
 
 function closeWebsocket() {
-  // this also closes the websocket
+  // this also caused the websocket connection to be closed
   messagesSubscription.unsubscribe()
 }
 
@@ -132,7 +130,7 @@ import makeWebSocketObservable, { WebSocketOptions } from 'rxjs-websockets'
 const options: WebSocketOptions = {
   // this is used to create the websocket compatible object,
   // the default is shown here
-  makeWebSocket: (url: string, protocols: string | string[]) =>
+  makeWebSocket: (url: string, protocols?: string | string[]) =>
     new WebSocket(url, protocols),
 
   // optional argument, passed to `makeWebSocket`

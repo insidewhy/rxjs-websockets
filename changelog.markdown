@@ -1,7 +1,7 @@
 
 # Changelog
 
-- 2019/01/09 - 7.0.0-beta.1 - Many improvements to API including
+- 2019/01/09 - 7.0.0-beta.1
   - Connection status handling is much simpler, everything can be done with a single observable.
   - Configuration parameters taken as an object instead of arguments, more future proof and self-documenting.
   - Improved documentation.
