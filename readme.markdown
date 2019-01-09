@@ -52,10 +52,18 @@ const messages$ = socket$.pipe(
 input$.next('some data')
 
 // the websocket connection is created during the `subscribe` call.
-const messagesSubscription = messages.subscribe((message: string) => {
-  console.log('received message:', message)
-  input$.next('i got your message')
-})
+const messagesSubscription = messages.subscribe(
+  (message: string) => {
+    console.log('received message:', message)
+    input$.next('i got your message')
+  },
+  (error: Error) => {
+    console.log('an error occurred and the socket was disconnected', error)
+  },
+  () => {
+    console.log('the connection was closed cleanly')
+  },
+)
 
 function closeWebsocket() {
   // this closes the websocket
@@ -93,7 +101,12 @@ A custom websocket factory function can be supplied that takes a URL and returns
 ```typescript
 const socket$ = websocketConnect(
   'ws://127.0.0.1:4201/ws',
+
+  // the optional protocols argument can be passed here and is forwarded to
+  // the websocket
   undefined,
+
+  // this is the factory
   (url, protocols) => new WebSocket(url, protocols)
 )
 ```
