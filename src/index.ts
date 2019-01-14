@@ -49,7 +49,10 @@ export default function makeWebSocketObservable<T extends WebSocketPayload = Web
   {
     protocols = defaultProtocols,
     makeWebSocket = defaultWebsocketFactory
-  }: WebSocketOptions,
+  }: WebSocketOptions = {
+    protocols: defaultProtocols,
+    makeWebSocket: defaultWebsocketFactory
+  },
 ): Observable<GetWebSocketResponses<T>> {
 
   return new Observable<GetWebSocketResponses<T>>(observer => {

@@ -1,6 +1,6 @@
 {
   "name": "rxjs-websockets",
-  "version": "7.0.0-beta.1",
+  "version": "7.0.0-beta.2",
   "description": "rxjs 6 websockets library",
   "main": "lib/index.js",
   "typings": "lib/index",
