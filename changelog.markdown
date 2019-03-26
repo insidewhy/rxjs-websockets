@@ -19,3 +19,4 @@
 - 2017/09/17 - 3.0.1 - Improve typing and make `protocols` an optional argument.
 - 2017/09/17 - 3.0.0 - Support `protocols` argument and improve typing.
 - 2017/09/03 - 2.0.0 - Remove support for json encoding/decoding.
+test
