@@ -78,9 +78,10 @@ export default function makeWebSocketObservable<T extends WebSocketPayload = Web
 
     socket.onopen = () => {
       isSocketOpen = true
-      observer.next(getWebSocketResponses)
       if (forcedClose) {
         socket.close()
+      } else {
+        observer.next(getWebSocketResponses)
       }
     }
 
