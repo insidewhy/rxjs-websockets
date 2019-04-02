@@ -1,7 +1,6 @@
 # rxjs-websockets
 
 [![build status](https://circleci.com/gh/ohjames/rxjs-websockets.png?style=shield)](https://circleci.com/gh/ohjames/rxjs-websockets)
-[![Greenkeeper badge](https://badges.greenkeeper.io/ohjames/rxjs-websockets.svg)](https://greenkeeper.io)
 [![Known Vulnerabilities](https://snyk.io/test/github/ohjames/rxjs-websockets/badge.svg)](https://snyk.io/test/github/ohjames/rxjs-websockets)
 
 An rxjs websocket library with a simple and flexible implementation. Supports the browser and node.js.
