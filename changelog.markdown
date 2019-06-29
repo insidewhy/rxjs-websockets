@@ -1,6 +1,8 @@
 
 # Changelog
 
+- 2019/06/29 - 7.0.1
+  - Provide variety of builds to support Angular 8's new build system
 - 2019/03/26 - 7.0.0
   - Ensure websocket is closed when associated observable is unsubscribed during connection.
 - 2019/01/14 - 7.0.0-beta.2

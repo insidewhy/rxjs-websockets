@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "lib": ["es6", "dom"],
+    "moduleResolution": "node",
+    "outDir": "../lib.es5",
+    "sourceMap": true,
+    "target": "es5",
+  },
+  "include": ["."],
+}

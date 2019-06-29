@@ -1,8 +1,10 @@
 {
   "name": "rxjs-websockets",
-  "version": "7.0.0",
+  "version": "7.0.1",
   "description": "rxjs 6 websockets library",
-  "main": "lib/index.js",
+  "main": "lib.es5/index.js",
+  "module": "lib.es5m/index.js",
+  "es2015": "lib.es2015/index.js",
   "typings": "lib/index",
   "repository": {
     "type": "git",
@@ -19,12 +21,13 @@
     "websockets"
   ],
   "scripts": {
-    "build": "tsc -p src",
-    "build:watch": "tsc -w --preserveWatchOutput -p src",
+    "prepublish": "yarn build",
+    "build": "tsc -p src/tsconfig.json && tsc -p src/tsconfig.es5.json && tsc -p src/tsconfig.es5.json -m es2015 --outDir lib.es5m",
+    "build:watch": "tsc -w --preserveWatchOutput -p src/tsconfig.es5.json",
     "test": "npm run build && npm run mocha",
-    "watch": "concurrently 'npm run build:watch' 'npm run mocha:watch'",
+    "watch": "npm run build && concurrently 'npm run build:watch' 'npm run mocha:watch'",
     "prepare": "npm run build",
-    "mocha": "mocha lib/*.spec.js",
+    "mocha": "mocha lib.es5/*.spec.js",
     "mocha:watch": "npm run mocha -- -w"
   },
   "author": "James Pike <github@chilon.net>",
