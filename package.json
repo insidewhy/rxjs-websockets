@@ -22,10 +22,11 @@
   ],
   "scripts": {
     "prepublish": "yarn build",
-    "build": "tsc -p src/tsconfig.json && tsc -p src/tsconfig.es5.json && tsc -p src/tsconfig.es5.json -m es2015 --outDir lib.es5m",
+    "build": "tsc -p src/tsconfig.json && npm run build:es5 && npm run build:es5 -- -m es2015 --outDir lib.es5m",
+    "build:es5": "tsc -p src/tsconfig.es5.json",
     "build:watch": "tsc -w --preserveWatchOutput -p src/tsconfig.es5.json",
     "test": "npm run build && npm run mocha",
-    "watch": "npm run build && concurrently 'npm run build:watch' 'npm run mocha:watch'",
+    "watch": "npm run build:es5 && concurrently 'npm run build:watch' 'npm run mocha:watch'",
     "prepare": "npm run build",
     "mocha": "mocha lib.es5/*.spec.js",
     "mocha:watch": "npm run mocha -- -w"

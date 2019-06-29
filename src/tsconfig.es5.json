@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "declaration": true,
+    "strict": true,
     "lib": ["es6", "dom"],
     "moduleResolution": "node",
     "outDir": "../lib.es5",

@@ -30,7 +30,7 @@ export type GetWebSocketResponses<T = WebSocketPayload> = (
   input: Observable<WebSocketPayload>
 ) => Observable<T>
 
-const defaultProtocols = []
+const defaultProtocols: string[] = []
 
 const defaultWebsocketFactory: WebSocketFactory = (
   url: string,
@@ -62,7 +62,9 @@ export default function makeWebSocketObservable<T extends WebSocketPayload = Web
     const getWebSocketResponses: GetWebSocketResponses<T> = (input: Observable<WebSocketPayload>) => {
       if (inputSubscription) {
         setClosedStatus()
-        observer.error(new Error('Web socket message factory function called more than once'))
+        const error = new Error('Web socket message factory function called more than once')
+        observer.error(error)
+        throw error
       } else {
         inputSubscription = input.subscribe(data => { socket.send(data) })
         return messages

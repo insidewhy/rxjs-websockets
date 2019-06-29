@@ -7,7 +7,7 @@ import * as chai from 'chai'
 import * as sinon from 'sinon'
 import * as sinonChai from 'sinon-chai'
 
-import connect, { normalClosureMessage } from '.'
+import connect, { normalClosureMessage, IWebSocket } from '.'
 
 chai.use(sinonChai)
 const { expect } = chai
@@ -27,15 +27,16 @@ describe('rxjs-websockets', () => {
   })
 
   class MockSocket {
-    onmessage: Function
-    onopen: Function
-    onclose: Function
+    onmessage = (event: any) => {}
+    onopen = (event: any) => {}
+    onclose = (event: any) => {}
+    onerror = (event: any) => {}
     close = sinon.stub()
     // forwards input as output
     send(data: string) { this.onmessage({ data }) }
   }
 
-  const connectHelper = (mockSocket, protocols?: string | string[]) =>
+  const connectHelper = (mockSocket: IWebSocket, protocols: string | string[] = []) =>
     connect('url', { protocols, makeWebSocket: () => mockSocket })
 
   it('connects to websocket lazily and retrieves data', () => {
@@ -63,7 +64,7 @@ describe('rxjs-websockets', () => {
     scheduler.schedule(() => {
       // if one of the expectations raises an error this won't be defined
       if (mockSocket.onopen)
-        mockSocket.onopen()
+        mockSocket.onopen({})
     }, 20)
 
     flush()
@@ -72,7 +73,7 @@ describe('rxjs-websockets', () => {
   it('closes websocket on unsubscribe', () => {
     const mockSocket = new MockSocket()
     const socket = connectHelper(mockSocket)
-    scheduler.schedule(() => mockSocket.onopen(), 10)
+    scheduler.schedule(() => mockSocket.onopen({}), 10)
 
     expect$(
       socket.pipe(switchMap(factory => factory(cold('a|')))),
@@ -87,7 +88,7 @@ describe('rxjs-websockets', () => {
     const runTest = (reason: string, code: number, expectedReason: string) => {
       const mockSocket = new MockSocket()
       const socket = connectHelper(mockSocket)
-      scheduler.schedule(() => mockSocket.onopen(), 10)
+      scheduler.schedule(() => mockSocket.onopen({}), 10)
       scheduler.schedule(() => mockSocket.onclose({ reason, code }), 30)
       expect$(
         socket.pipe(
