@@ -5,7 +5,7 @@
   "main": "lib.es5/index.js",
   "module": "lib.es5m/index.js",
   "es2015": "lib.es2015/index.js",
-  "typings": "lib/index",
+  "typings": "lib.es5m/index",
   "repository": {
     "type": "git",
     "url": "git://github.com/ohjames/rxjs-websockets.git"
