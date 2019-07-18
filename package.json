@@ -1,11 +1,11 @@
 {
   "name": "rxjs-websockets",
-  "version": "7.0.1",
+  "version": "7.0.2",
   "description": "rxjs 6 websockets library",
   "main": "lib.es5/index.js",
   "module": "lib.es5m/index.js",
   "es2015": "lib.es2015/index.js",
-  "typings": "lib.es5m/index",
+  "typings": "lib.es2015/index",
   "repository": {
     "type": "git",
     "url": "git://github.com/ohjames/rxjs-websockets.git"

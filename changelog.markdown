@@ -1,6 +1,8 @@
 
 # Changelog
 
+- 2019/07/18 - 7.0.2
+  - Fix `typings` entry in `package.json`.
 - 2019/06/29 - 7.0.1
   - Provide variety of builds to support Angular 8's new build system
 - 2019/03/26 - 7.0.0
