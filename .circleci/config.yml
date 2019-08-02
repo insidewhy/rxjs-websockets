@@ -12,18 +12,18 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "package.json" }}
+          - v2-dependencies-{{ checksum "yarn.lock" }}
           # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
-      - run: yarn install
+          - v2-dependencies-
+      - run: yarn install --frozen-lockfile
       - save_cache:
           paths:
             - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
+            - ~/.cache/yarn
+          key: v2-dependencies-{{ checksum "yarn.lock" }}
       - run: yarn test
 workflows:
   version: 2
   test:
     jobs:
       - test
-
