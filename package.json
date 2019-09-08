@@ -22,14 +22,15 @@
   ],
   "scripts": {
     "prepublish": "yarn build",
-    "build": "tsc -p src/tsconfig.json && npm run build:es5 && npm run build:es5 -- -m es2015 --outDir lib.es5m",
+    "build": "yarn build:modern && yarn build:es5 && yarn build:es5 -m es2015 --outDir lib.es5m",
+    "build:modern": "tsc -p src/tsconfig.json",
     "build:es5": "tsc -p src/tsconfig.es5.json",
-    "build:watch": "tsc -w --preserveWatchOutput -p src/tsconfig.es5.json",
-    "test": "npm run build && npm run mocha",
-    "watch": "npm run build:es5 && concurrently 'npm run build:watch' 'npm run mocha:watch'",
-    "prepare": "npm run build",
+    "build:watch": "tsc -w -p src/tsconfig.es5.json",
+    "test": "yarn build && yarn mocha",
+    "watch": "yarn build:es5 && concurrently 'yarn build:watch' 'yarn mocha:watch'",
+    "prepare": "yarn build",
     "mocha": "mocha lib.es5/*.spec.js",
-    "mocha:watch": "npm run mocha -- -w"
+    "mocha:watch": "yarn mocha -w"
   },
   "author": "James Pike <github@chilon.net>",
   "license": "ISC",
