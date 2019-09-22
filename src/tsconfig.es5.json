@@ -9,5 +9,5 @@
     "target": "es5",
     "preserveWatchOutput": true
   },
-  "include": ["."],
+  "include": ["."]
 }

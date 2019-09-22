@@ -33,11 +33,16 @@ describe('rxjs-websockets', () => {
     onerror = (event: any) => {}
     close = sinon.stub()
     // forwards input as output
-    send(data: string) { this.onmessage({ data }) }
+    send(data: string) {
+      this.onmessage({ data })
+    }
   }
 
   const connectHelper = (mockSocket: WebSocketLike, protocols: string | string[] = []) =>
-    connect('url', { protocols, makeWebSocket: () => mockSocket })
+    connect(
+      'url',
+      { protocols, makeWebSocket: () => mockSocket },
+    )
 
   it('connects to websocket lazily and retrieves data', () => {
     const mockSocket = new MockSocket()
@@ -54,17 +59,16 @@ describe('rxjs-websockets', () => {
               // ensure factory is called when socket is open
               expect(scheduler.now()).to.equal(20)
               return factory(input)
-            })
+            }),
           )
-        })
-      )
+        }),
+      ),
     ).toBe('--cde')
 
     // websocket opens at 20ms
     scheduler.schedule(() => {
       // if one of the expectations raises an error this won't be defined
-      if (mockSocket.onopen)
-        mockSocket.onopen({})
+      if (mockSocket.onopen) mockSocket.onopen({})
     }, 20)
 
     flush()
@@ -75,10 +79,7 @@ describe('rxjs-websockets', () => {
     const socket = connectHelper(mockSocket)
     scheduler.schedule(() => mockSocket.onopen({}), 10)
 
-    expect$(
-      socket.pipe(switchMap(factory => factory(cold('a|')))),
-      '--!',
-    ).toBe('-a')
+    expect$(socket.pipe(switchMap(factory => factory(cold('a|')))), '--!').toBe('-a')
     flush()
 
     expect(mockSocket.close).to.have.been.calledOnce
@@ -94,7 +95,7 @@ describe('rxjs-websockets', () => {
         socket.pipe(
           switchMap(factory => factory(cold('a'))),
           // rethrow error as string... can't get expectation to match the error
-          catchError(error => throwError(error.message))
+          catchError(error => throwError(error.message)),
         ),
       ).toBe('-a-#', undefined, expectedReason)
       flush()
@@ -107,6 +108,6 @@ describe('rxjs-websockets', () => {
 
     it('with normalClosureMessage when socket was closed normally', () => {
       runTest('whatever', 1000, normalClosureMessage)
-    });
+    })
   })
 })

@@ -27,7 +27,7 @@ export interface WebSocketLike {
 export type WebSocketFactory = (url: string, protocols: string | string[]) => WebSocketLike
 
 export type GetWebSocketResponses<T = WebSocketPayload> = (
-  input: Observable<WebSocketPayload>
+  input: Observable<WebSocketPayload>,
 ) => Observable<T>
 
 const defaultProtocols: string[] = []
@@ -46,15 +46,11 @@ export const normalClosureMessage = 'Normal closure'
 
 export default function makeWebSocketObservable<T extends WebSocketPayload = WebSocketPayload>(
   url: string,
-  {
-    protocols = defaultProtocols,
-    makeWebSocket = defaultWebsocketFactory
-  }: WebSocketOptions = {
+  { protocols = defaultProtocols, makeWebSocket = defaultWebsocketFactory }: WebSocketOptions = {
     protocols: defaultProtocols,
-    makeWebSocket: defaultWebsocketFactory
+    makeWebSocket: defaultWebsocketFactory,
   },
 ): Observable<GetWebSocketResponses<T>> {
-
   return new Observable<GetWebSocketResponses<T>>(observer => {
     let inputSubscription: Subscription
     const messages = new Subject<T>()
@@ -64,16 +60,22 @@ export default function makeWebSocketObservable<T extends WebSocketPayload = Web
     let isSocketOpen = false
     let forcedClose = false
 
-    const setClosedStatus = () => { isSocketOpen = false }
+    const setClosedStatus = () => {
+      isSocketOpen = false
+    }
 
-    const getWebSocketResponses: GetWebSocketResponses<T> = (input: Observable<WebSocketPayload>) => {
+    const getWebSocketResponses: GetWebSocketResponses<T> = (
+      input: Observable<WebSocketPayload>,
+    ) => {
       if (inputSubscription) {
         setClosedStatus()
         const error = new Error('Web socket message factory function called more than once')
         observer.error(error)
         throw error
       } else {
-        inputSubscription = input.subscribe(data => { socket.send(data) })
+        inputSubscription = input.subscribe(data => {
+          socket.send(data)
+        })
         return messages
       }
     }
@@ -98,23 +100,20 @@ export default function makeWebSocketObservable<T extends WebSocketPayload = Web
 
     socket.onclose = (event: EventWithCodeAndReason) => {
       // prevent observer.complete() being called after observer.error(...)
-      if (! isSocketOpen)
-        return
+      if (!isSocketOpen) return
 
       setClosedStatus()
       if (forcedClose) {
         observer.complete()
         messages.complete()
-      }
-      else {
+      } else {
         observer.error(new Error(event.code === 1000 ? normalClosureMessage : event.reason))
       }
     }
 
     return () => {
       forcedClose = true
-      if (inputSubscription)
-        inputSubscription.unsubscribe()
+      if (inputSubscription) inputSubscription.unsubscribe()
 
       if (isSocketOpen) {
         setClosedStatus()
