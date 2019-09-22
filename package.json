@@ -1,6 +1,6 @@
 {
   "name": "rxjs-websockets",
-  "version": "7.0.2",
+  "version": "8.0.0",
   "description": "rxjs 6 websockets library",
   "main": "lib.es5/index.js",
   "module": "lib.es5m/index.js",
@@ -21,14 +21,14 @@
     "websockets"
   ],
   "scripts": {
-    "prepublish": "yarn build",
+    "prepublishOnly": "yarn build",
     "build": "yarn build:modern && yarn build:es5 && yarn build:es5 -m es2015 --outDir lib.es5m",
     "build:modern": "tsc -p src/tsconfig.json",
     "build:es5": "tsc -p src/tsconfig.es5.json",
     "build:watch": "tsc -w -p src/tsconfig.es5.json",
+    "lint": "eslint 'src/*.ts'",
     "test": "yarn build && yarn mocha",
     "watch": "yarn build:es5 && concurrently 'yarn build:watch' 'yarn mocha:watch'",
-    "prepare": "yarn build",
     "mocha": "mocha lib.es5/*.spec.js",
     "mocha:watch": "yarn mocha -w"
   },
@@ -42,8 +42,12 @@
     "@types/mocha": "5.2.7",
     "@types/sinon": "7.0.13",
     "@types/sinon-chai": "3.2.3",
+    "@typescript-eslint/eslint-plugin": "^2.3.0",
+    "@typescript-eslint/parser": "^2.3.0",
     "chai": "4.2.0",
     "concurrently": "4.1.2",
+    "eslint": "^6.4.0",
+    "eslint-config-prettier": "^6.3.0",
     "mocha": "6.2.0",
     "rxjs": "6.5.3",
     "sinon": "7.4.2",

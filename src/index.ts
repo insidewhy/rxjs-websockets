@@ -11,7 +11,7 @@ interface EventWithMessage {
 
 type WebSocketPayload = string | ArrayBuffer | Blob
 
-export interface IWebSocket {
+export interface WebSocketLike {
   close(): any
   send(data: WebSocketPayload): any
 
@@ -24,7 +24,7 @@ export interface IWebSocket {
   onerror: ((event: any) => any) | null
 }
 
-export type WebSocketFactory = (url: string, protocols: string | string[]) => IWebSocket
+export type WebSocketFactory = (url: string, protocols: string | string[]) => WebSocketLike
 
 export type GetWebSocketResponses<T = WebSocketPayload> = (
   input: Observable<WebSocketPayload>
@@ -35,7 +35,7 @@ const defaultProtocols: string[] = []
 const defaultWebsocketFactory: WebSocketFactory = (
   url: string,
   protocols: string | string[],
-): IWebSocket => new WebSocket(url, protocols)
+): WebSocketLike => new WebSocket(url, protocols)
 
 export interface WebSocketOptions {
   protocols: string | string[]
@@ -59,6 +59,13 @@ export default function makeWebSocketObservable<T extends WebSocketPayload = Web
     let inputSubscription: Subscription
     const messages = new Subject<T>()
 
+    const socket = makeWebSocket(url, protocols)
+
+    let isSocketOpen = false
+    let forcedClose = false
+
+    const setClosedStatus = () => { isSocketOpen = false }
+
     const getWebSocketResponses: GetWebSocketResponses<T> = (input: Observable<WebSocketPayload>) => {
       if (inputSubscription) {
         setClosedStatus()
@@ -70,13 +77,6 @@ export default function makeWebSocketObservable<T extends WebSocketPayload = Web
         return messages
       }
     }
-
-    const socket = makeWebSocket(url, protocols)
-
-    let isSocketOpen = false
-    let forcedClose = false
-
-    const setClosedStatus = () => { isSocketOpen = false }
 
     socket.onopen = () => {
       isSocketOpen = true

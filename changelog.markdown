@@ -1,6 +1,8 @@
 
 # Changelog
 
+- 2019/09/22 - 8.0.0
+  - Change `IWebSocket` interface to `WebSocketLike`.
 - 2019/07/18 - 7.0.2
   - Fix `typings` entry in `package.json`.
 - 2019/06/29 - 7.0.1

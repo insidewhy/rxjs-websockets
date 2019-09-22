@@ -7,7 +7,7 @@ import * as chai from 'chai'
 import * as sinon from 'sinon'
 import * as sinonChai from 'sinon-chai'
 
-import connect, { normalClosureMessage, IWebSocket } from '.'
+import connect, { normalClosureMessage, WebSocketLike } from '.'
 
 chai.use(sinonChai)
 const { expect } = chai
@@ -36,7 +36,7 @@ describe('rxjs-websockets', () => {
     send(data: string) { this.onmessage({ data }) }
   }
 
-  const connectHelper = (mockSocket: IWebSocket, protocols: string | string[] = []) =>
+  const connectHelper = (mockSocket: WebSocketLike, protocols: string | string[] = []) =>
     connect('url', { protocols, makeWebSocket: () => mockSocket })
 
   it('connects to websocket lazily and retrieves data', () => {
