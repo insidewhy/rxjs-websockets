@@ -13,6 +13,7 @@ chai.use(sinonChai)
 const { expect } = chai
 
 describe('rxjs-websockets', () => {
+  /* eslint-disable @typescript-eslint/no-empty-function */
   let scheduler: TestScheduler
   let expect$: typeof scheduler.expectObservable
   let flush: typeof scheduler.flush
@@ -39,10 +40,7 @@ describe('rxjs-websockets', () => {
   }
 
   const connectHelper = (mockSocket: WebSocketLike, protocols: string | string[] = []) =>
-    connect(
-      'url',
-      { protocols, makeWebSocket: () => mockSocket },
-    )
+    connect('url', { protocols, makeWebSocket: () => mockSocket })
 
   it('connects to websocket lazily and retrieves data', () => {
     const mockSocket = new MockSocket()
