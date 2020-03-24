@@ -57,11 +57,11 @@ export default function makeWebSocketObservable<T extends WebSocketPayload = Web
 
     const socket = makeWebSocket(url, protocols)
 
-    let isSocketOpen = false
+    let isSocketClosed = false
     let forcedClose = false
 
-    const setClosedStatus = () => {
-      isSocketOpen = false
+    const setClosedStatus = (): void => {
+      isSocketClosed = true
     }
 
     const getWebSocketResponses: GetWebSocketResponses<T> = (
@@ -80,27 +80,27 @@ export default function makeWebSocketObservable<T extends WebSocketPayload = Web
       }
     }
 
-    socket.onopen = () => {
-      isSocketOpen = true
+    socket.onopen = (): void => {
       if (forcedClose) {
+        isSocketClosed = true
         socket.close()
       } else {
         observer.next(getWebSocketResponses)
       }
     }
 
-    socket.onmessage = (message: { data: T }) => {
+    socket.onmessage = (message: { data: T }): void => {
       messages.next(message.data)
     }
 
-    socket.onerror = (error: EventWithMessage) => {
+    socket.onerror = (error: EventWithMessage): void => {
       setClosedStatus()
       observer.error(new Error(error.message))
     }
 
-    socket.onclose = (event: EventWithCodeAndReason) => {
+    socket.onclose = (event: EventWithCodeAndReason): void => {
       // prevent observer.complete() being called after observer.error(...)
-      if (!isSocketOpen) return
+      if (isSocketClosed) return
 
       setClosedStatus()
       if (forcedClose) {
@@ -111,11 +111,11 @@ export default function makeWebSocketObservable<T extends WebSocketPayload = Web
       }
     }
 
-    return () => {
+    return (): void => {
       forcedClose = true
       if (inputSubscription) inputSubscription.unsubscribe()
 
-      if (isSocketOpen) {
+      if (!isSocketClosed) {
         setClosedStatus()
         socket.close()
       }
