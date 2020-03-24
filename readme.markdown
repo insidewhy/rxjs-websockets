@@ -1,14 +1,14 @@
 # rxjs-websockets
 
-[![build status](https://circleci.com/gh/ohjames/rxjs-websockets.png?style=shield)](https://circleci.com/gh/ohjames/rxjs-websockets)
-[![Known Vulnerabilities](https://snyk.io/test/github/ohjames/rxjs-websockets/badge.svg)](https://snyk.io/test/github/ohjames/rxjs-websockets)
+[![build status](https://circleci.com/gh/insidewhy/rxjs-websockets.png?style=shield)](https://circleci.com/gh/insidewhy/rxjs-websockets)
+[![Known Vulnerabilities](https://snyk.io/test/github/insidewhy/rxjs-websockets/badge.svg)](https://snyk.io/test/github/insidewhy/rxjs-websockets)
 
 An rxjs websocket library with a simple and flexible implementation. Supports the browser and node.js.
 
 ## Comparisons to other rxjs websocket libraries:
 
 - [observable-socket](https://github.com/killtheliterate/observable-socket)
-  - observable-socket provides an input subject for the user, rxjs-websockets allows the user to supply the input stream as a parameter to allow the user to select an observable with semantics appropriate for their own use case ([queueing-subject](https://github.com/ohjames/queueing-subject) can be used to achieve the same semantics as observable-socket).
+  - observable-socket provides an input subject for the user, rxjs-websockets allows the user to supply the input stream as a parameter to allow the user to select an observable with semantics appropriate for their own use case ([queueing-subject](https://github.com/insidewhy/queueing-subject) can be used to achieve the same semantics as observable-socket).
   - With observable-socket the WebSocket object must be used and managed by the user, rxjs-websocket manages the WebSocket(s) for the user lazily according to subscriptions to the messages observable.
   - With observable-socket the WebSocket object must be observed using plain old events to detect the connection status, rxjs-websockets presents the connection status through observables.
 - [rxjs built-in websocket subject](https://github.com/ReactiveX/rxjs/blob/next/src/observable/dom/webSocket.ts)
