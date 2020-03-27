@@ -1,3 +1,3 @@
 {
-  "rangeStrategy": "replace"
+  "extends": ["config:base"]
 }
