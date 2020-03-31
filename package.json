@@ -51,7 +51,7 @@
     "eslint": "6.8.0",
     "eslint-config-prettier": "6.10.1",
     "husky": "3.1.0",
-    "mocha": "6.2.2",
+    "mocha": "6.2.3",
     "prettier": "1.19.1",
     "pretty-quick": "2.0.1",
     "rxjs": "6.5.4",
