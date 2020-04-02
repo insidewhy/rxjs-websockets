@@ -2,10 +2,13 @@
   "name": "rxjs-websockets",
   "version": "8.0.1",
   "description": "rxjs 6 websockets library",
+  "author": "James Pike <github@chilon.net>",
+  "license": "ISC",
   "main": "lib.es5/index.js",
   "module": "lib.es5m/index.js",
   "es2015": "lib.es2015/index.js",
   "typings": "lib.es2015/index",
+  "sideEffects": false,
   "repository": {
     "type": "git",
     "url": "git://github.com/ohjames/rxjs-websockets.git"
@@ -34,8 +37,6 @@
     "mocha": "mocha lib.es5/*.spec.js",
     "mocha:watch": "yarn mocha -w"
   },
-  "author": "James Pike <github@chilon.net>",
-  "license": "ISC",
   "peerDependencies": {
     "rxjs": "^6.1.0"
   },
