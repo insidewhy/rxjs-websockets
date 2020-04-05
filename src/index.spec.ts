@@ -1,16 +1,9 @@
-import 'mocha'
 import { TestScheduler } from 'rxjs/testing'
 import { of } from 'rxjs'
 import { delay, catchError, switchMap } from 'rxjs/operators'
 import { throwError } from 'rxjs/internal/observable/throwError'
-import * as chai from 'chai'
-import * as sinon from 'sinon'
-import * as sinonChai from 'sinon-chai'
 
 import connect, { normalClosureMessage, WebSocketLike } from '.'
-
-chai.use(sinonChai)
-const { expect } = chai
 
 describe('rxjs-websockets', () => {
   /* eslint-disable @typescript-eslint/no-empty-function */
@@ -20,7 +13,9 @@ describe('rxjs-websockets', () => {
   let cold: typeof scheduler.createColdObservable
   let hot: typeof scheduler.createHotObservable
   beforeEach(() => {
-    scheduler = new TestScheduler(chai.assert.deepEqual)
+    scheduler = new TestScheduler((x, y) => {
+      expect(x).toEqual(y)
+    })
     expect$ = scheduler.expectObservable.bind(scheduler)
     flush = scheduler.flush.bind(scheduler)
     cold = scheduler.createColdObservable.bind(scheduler)
@@ -32,7 +27,7 @@ describe('rxjs-websockets', () => {
     onopen = (event: any) => {}
     onclose = (event: any) => {}
     onerror = (event: any) => {}
-    close = sinon.stub()
+    close = jest.fn()
     // forwards input as output
     send(data: string) {
       this.onmessage({ data })
@@ -55,7 +50,7 @@ describe('rxjs-websockets', () => {
           return socket.pipe(
             switchMap((factory) => {
               // ensure factory is called when socket is open
-              expect(scheduler.now()).to.equal(20)
+              expect(scheduler.now()).toEqual(20)
               return factory(input)
             }),
           )
@@ -80,7 +75,7 @@ describe('rxjs-websockets', () => {
     expect$(socket.pipe(switchMap((factory) => factory(cold('a|')))), '--!').toBe('-a')
     flush()
 
-    expect(mockSocket.close).to.have.been.calledOnce
+    expect(mockSocket.close).toHaveBeenCalledTimes(1)
   })
 
   describe('raises Error', () => {

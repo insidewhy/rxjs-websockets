@@ -35,34 +35,28 @@
     "lint-fix": "yarn lint --fix",
     "validate-prettiness": "prettier -c 'src/*.ts'",
     "make-prettier": "prettier --write 'src/*.ts' '*.markdown'",
-    "test": "yarn build-es5 && yarn mocha",
-    "watch": "yarn build-es5 && concurrently 'yarn build-watch' 'yarn mocha-watch'",
+    "test": "yarn build-es5 && yarn jest",
+    "watch": "yarn build-es5 && concurrently 'yarn build-watch' 'yarn jest-watch'",
     "validate": "yarn test && yarn lint && yarn validate-prettiness",
-    "mocha": "mocha dist.es5/*.spec.js",
-    "mocha-watch": "yarn mocha -w"
+    "jest": "jest dist.es5/*.spec.js",
+    "jest-watch": "yarn jest --watch"
   },
   "peerDependencies": {
     "rxjs": "^6.1.0"
   },
   "devDependencies": {
-    "@types/chai": "4.2.11",
-    "@types/mocha": "7.0.2",
-    "@types/sinon": "9.0.0",
-    "@types/sinon-chai": "3.2.4",
+    "@types/jest": "25.2.1",
     "@typescript-eslint/eslint-plugin": "2.26.0",
     "@typescript-eslint/parser": "2.26.0",
-    "chai": "4.2.0",
     "concurrently": "5.1.0",
     "eslint": "6.8.0",
     "eslint-config-prettier": "6.10.1",
     "husky": "4.2.3",
-    "mocha": "7.1.1",
+    "jest": "25.2.7",
     "prettier": "2.0.2",
     "pretty-quick": "2.0.1",
     "rimraf": "3.0.2",
     "rxjs": "6.5.5",
-    "sinon": "9.0.1",
-    "sinon-chai": "3.5.0",
     "typescript": "3.8.3"
   }
 }
