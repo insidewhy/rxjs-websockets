@@ -36,7 +36,7 @@
     "run-prettier": "prettier 'src/*.ts' '*.md'",
     "validate-prettiness": "yarn run-prettier -c",
     "make-prettier": "yarn run-prettier --write",
-    "test": "yarn build-es5 && yarn jest",
+    "test": "yarn jest",
     "watch": "yarn build-es5 && concurrently 'yarn build-watch' 'yarn jest-watch'",
     "validate": "yarn test && yarn lint && yarn validate-prettiness",
     "jest-watch": "yarn jest --watch"

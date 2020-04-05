@@ -21,6 +21,7 @@ jobs:
             - node_modules
             - ~/.cache/yarn
           key: v2-dependencies-{{ checksum "yarn.lock" }}
+      - run: yarn build-es5
       - run: yarn test
       - run: yarn lint
       - run: yarn validate-prettiness
