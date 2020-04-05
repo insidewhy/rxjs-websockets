@@ -1,3 +1,3 @@
 module.exports = {
-  testRegex: 'dist.*spec\\.js$',
+  testRegex: 'dist.es5/.*spec\\.js$',
 }

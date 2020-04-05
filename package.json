@@ -38,7 +38,6 @@
     "test": "yarn build-es5 && yarn jest",
     "watch": "yarn build-es5 && concurrently 'yarn build-watch' 'yarn jest-watch'",
     "validate": "yarn test && yarn lint && yarn validate-prettiness",
-    "jest": "jest dist.es5/*.spec.js",
     "jest-watch": "yarn jest --watch"
   },
   "peerDependencies": {
