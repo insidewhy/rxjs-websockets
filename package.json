@@ -14,10 +14,10 @@
     "websocket",
     "websockets"
   ],
-  "main": "lib.es5/index.js",
-  "module": "lib.es5m/index.js",
-  "es2015": "lib.es2015/index.js",
-  "typings": "lib.es2015/index",
+  "main": "dist.es5/index.js",
+  "module": "dist.es5m/index.js",
+  "es2015": "dist.es2015/index.js",
+  "typings": "dist.es2015/index",
   "sideEffects": false,
   "repository": {
     "type": "git",
@@ -25,7 +25,7 @@
   },
   "scripts": {
     "prepublishOnly": "yarn build",
-    "build": "yarn build:modern && yarn build:es5 && yarn build:es5 -m es2015 --outDir lib.es5m",
+    "build": "yarn build:modern && yarn build:es5 && yarn build:es5 -m es2015 --outDir dist.es5m",
     "build:modern": "tsc -p src/tsconfig.json",
     "build:es5": "tsc -p src/tsconfig.es5.json",
     "build:watch": "tsc -w -p src/tsconfig.es5.json",
@@ -34,7 +34,7 @@
     "test": "yarn build && yarn mocha",
     "validate": "yarn test && yarn lint && yarn validate-prettiness",
     "watch": "yarn build:es5 && concurrently 'yarn build:watch' 'yarn mocha:watch'",
-    "mocha": "mocha lib.es5/*.spec.js",
+    "mocha": "mocha dist.es5/*.spec.js",
     "mocha:watch": "yarn mocha -w"
   },
   "peerDependencies": {

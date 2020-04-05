@@ -4,7 +4,7 @@
     "strict": true,
     "lib": ["es6", "dom"],
     "moduleResolution": "node",
-    "outDir": "../lib.es5",
+    "outDir": "../dist.es5",
     "sourceMap": true,
     "target": "es5",
     "preserveWatchOutput": true
