@@ -2,6 +2,7 @@
 
 [![build status](https://circleci.com/gh/insidewhy/rxjs-websockets.png?style=shield)](https://circleci.com/gh/insidewhy/rxjs-websockets)
 [![Known Vulnerabilities](https://snyk.io/test/github/insidewhy/rxjs-websockets/badge.svg)](https://snyk.io/test/github/insidewhy/rxjs-websockets)
+[![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com)
 
 An rxjs websocket library with a simple and flexible implementation. Supports the browser and node.js.
 
