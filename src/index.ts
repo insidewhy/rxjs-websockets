@@ -51,7 +51,7 @@ export default function makeWebSocketObservable<T extends WebSocketPayload = Web
     makeWebSocket: defaultWebsocketFactory,
   },
 ): Observable<GetWebSocketResponses<T>> {
-  return new Observable<GetWebSocketResponses<T>>(observer => {
+  return new Observable<GetWebSocketResponses<T>>((observer) => {
     let inputSubscription: Subscription
     const messages = new Subject<T>()
 
@@ -73,7 +73,7 @@ export default function makeWebSocketObservable<T extends WebSocketPayload = Web
         observer.error(error)
         throw error
       } else {
-        inputSubscription = input.subscribe(data => {
+        inputSubscription = input.subscribe((data) => {
           socket.send(data)
         })
         return messages

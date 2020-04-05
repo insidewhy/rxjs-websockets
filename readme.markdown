@@ -116,8 +116,8 @@ const input$ = new Subject<string>()
 const socket$ = makeWebSocketObservable('ws://localhost/websocket-path')
 
 const messages$ = socket$.pipe(
-  switchMap(getResponses => getResponses(input$)),
-  retryWhen(errors => errors.pipe(delay(1000))),
+  switchMap((getResponses) => getResponses(input$)),
+  retryWhen((errors) => errors.pipe(delay(1000))),
 )
 ```
 
@@ -155,8 +155,8 @@ function makeJsonWebSocketObservable(
   const socket$ = makeWebSocketObservable<string>(url, options)
   return socket$.pipe(
     map((getResponses: GetWebSocketReponses<string>) => (input$: Observable<object>) =>
-      getResponses(input$.pipe(map(request => JSON.stringify(request)))).pipe(
-        map(response => JSON.parse(response)),
+      getResponses(input$.pipe(map((request) => JSON.stringify(request)))).pipe(
+        map((response) => JSON.parse(response)),
       ),
     ),
   )

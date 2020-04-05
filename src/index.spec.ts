@@ -53,7 +53,7 @@ describe('rxjs-websockets', () => {
         delay(10, scheduler),
         switchMap(() => {
           return socket.pipe(
-            switchMap(factory => {
+            switchMap((factory) => {
               // ensure factory is called when socket is open
               expect(scheduler.now()).to.equal(20)
               return factory(input)
@@ -77,7 +77,7 @@ describe('rxjs-websockets', () => {
     const socket = connectHelper(mockSocket)
     scheduler.schedule(() => mockSocket.onopen({}), 10)
 
-    expect$(socket.pipe(switchMap(factory => factory(cold('a|')))), '--!').toBe('-a')
+    expect$(socket.pipe(switchMap((factory) => factory(cold('a|')))), '--!').toBe('-a')
     flush()
 
     expect(mockSocket.close).to.have.been.calledOnce
@@ -91,9 +91,9 @@ describe('rxjs-websockets', () => {
       scheduler.schedule(() => mockSocket.onclose({ reason, code }), 30)
       expect$(
         socket.pipe(
-          switchMap(factory => factory(cold('a'))),
+          switchMap((factory) => factory(cold('a'))),
           // rethrow error as string... can't get expectation to match the error
-          catchError(error => throwError(error.message)),
+          catchError((error) => throwError(error.message)),
         ),
       ).toBe('-a-#', undefined, expectedReason)
       flush()
