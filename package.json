@@ -34,7 +34,7 @@
     "lint": "eslint 'src/*.ts'",
     "lint-fix": "yarn lint --fix",
     "validate-prettiness": "prettier -c 'src/*.ts'",
-    "make-prettier": "prettier --write 'src/*.ts' '*.markdown'",
+    "make-prettier": "prettier --write 'src/*.ts' '*.md'",
     "test": "yarn build-es5 && yarn jest",
     "watch": "yarn build-es5 && concurrently 'yarn build-watch' 'yarn jest-watch'",
     "validate": "yarn test && yarn lint && yarn validate-prettiness",
