@@ -4,6 +4,10 @@
   "description": "rxjs 6 websockets library",
   "author": "insidewhy <github@chilon.net>",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/insidewhy/rxjs-websockets.git"
+  },
   "keywords": [
     "angular",
     "angular2",
@@ -19,23 +23,21 @@
   "es2015": "dist.es2015/index.js",
   "typings": "dist.es2015/index",
   "sideEffects": false,
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/insidewhy/rxjs-websockets.git"
-  },
   "scripts": {
     "prepublishOnly": "yarn build",
-    "build": "yarn build:modern && yarn build:es5 && yarn build:es5 -m es2015 --outDir dist.es5m",
-    "build:modern": "tsc -p src/tsconfig.json",
-    "build:es5": "tsc -p src/tsconfig.es5.json",
-    "build:watch": "tsc -w -p src/tsconfig.es5.json",
+    "build": "yarn build-modern && yarn build-es5 && yarn build-es5m",
+    "build-modern": "tsc -p src",
+    "build-es5": "tsc -p src --target es5 --outDir dist.es5",
+    "build-es5m": "yarn build-es5 -m es2015 --outDir dist.es5m",
+    "build-watch": "yarn build-es5 -w",
+    "clean": "rimraf 'dist*'",
     "lint": "eslint 'src/*.ts'",
     "validate-prettiness": "prettier -c 'src/*.ts'",
-    "test": "yarn build && yarn mocha",
+    "test": "yarn build-es5 && yarn mocha",
+    "watch": "yarn build-es5 && concurrently 'yarn build-watch' 'yarn mocha-watch'",
     "validate": "yarn test && yarn lint && yarn validate-prettiness",
-    "watch": "yarn build:es5 && concurrently 'yarn build:watch' 'yarn mocha:watch'",
     "mocha": "mocha dist.es5/*.spec.js",
-    "mocha:watch": "yarn mocha -w"
+    "mocha-watch": "yarn mocha -w"
   },
   "peerDependencies": {
     "rxjs": "^6.1.0"
@@ -55,6 +57,7 @@
     "mocha": "7.1.1",
     "prettier": "1.19.1",
     "pretty-quick": "2.0.1",
+    "rimraf": "^3.0.2",
     "rxjs": "6.5.4",
     "sinon": "9.0.1",
     "sinon-chai": "3.5.0",
