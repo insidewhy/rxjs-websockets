@@ -2,17 +2,8 @@
   "name": "rxjs-websockets",
   "version": "8.0.1",
   "description": "rxjs 6 websockets library",
-  "author": "James Pike <github@chilon.net>",
+  "author": "insidewhy <github@chilon.net>",
   "license": "ISC",
-  "main": "lib.es5/index.js",
-  "module": "lib.es5m/index.js",
-  "es2015": "lib.es2015/index.js",
-  "typings": "lib.es2015/index",
-  "sideEffects": false,
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/ohjames/rxjs-websockets.git"
-  },
   "keywords": [
     "angular",
     "angular2",
@@ -23,6 +14,15 @@
     "websocket",
     "websockets"
   ],
+  "main": "lib.es5/index.js",
+  "module": "lib.es5m/index.js",
+  "es2015": "lib.es2015/index.js",
+  "typings": "lib.es2015/index",
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/insidewhy/rxjs-websockets.git"
+  },
   "scripts": {
     "prepublishOnly": "yarn build",
     "build": "yarn build:modern && yarn build:es5 && yarn build:es5 -m es2015 --outDir lib.es5m",
