@@ -26,7 +26,7 @@ yarn add rxjs-websockets
 
 ## Changelog
 
-[Changelog here](changelog.markdown)
+[Changelog here](changelog.md)
 
 ## Simple usage
 

@@ -1,5 +1,7 @@
 # Changelog
 
+- 2020/03/20 - 8.0.1
+  - Ensure `close` is called even when the `open` event is not received.
 - 2019/09/22 - 8.0.0
   - Change `IWebSocket` interface to `WebSocketLike`.
 - 2019/07/18 - 7.0.2
