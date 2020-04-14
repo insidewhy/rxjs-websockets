@@ -1,3 +1,4 @@
 module.exports = {
-  testRegex: 'dist.es5/.*spec\\.js$',
+  testRegex: 'spec\\.js$',
+  roots: ['<rootDir>/dist.es5'],
 }
