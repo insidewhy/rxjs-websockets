@@ -57,6 +57,6 @@
     "pretty-quick": "2.0.1",
     "rimraf": "3.0.2",
     "rxjs": "6.5.5",
-    "typescript": "3.8.3"
+    "typescript": "3.9.5"
   }
 }
