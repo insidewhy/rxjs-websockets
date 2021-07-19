@@ -1,7 +1,6 @@
 import { TestScheduler } from 'rxjs/testing'
-import { of } from 'rxjs'
+import { of, throwError } from 'rxjs'
 import { delay, catchError, switchMap } from 'rxjs/operators'
-import { throwError } from 'rxjs/internal/observable/throwError'
 
 import connect, { normalClosureMessage, WebSocketLike } from '.'
 

@@ -24,6 +24,14 @@ npm install -S rxjs-websockets
 yarn add rxjs-websockets
 ```
 
+For rxjs 6 support, rxjs-websockets 8 is needed.
+
+```bash
+npm install -S rxjs-websockets@8
+# or
+yarn add rxjs-websockets@8
+```
+
 ## Changelog
 
 [Changelog here](changelog.md)
@@ -155,10 +163,11 @@ function makeJsonWebSocketObservable(
 ): Observable<unknown> {
   const socket$ = makeWebSocketObservable<string>(url, options)
   return socket$.pipe(
-    map((getResponses: GetWebSocketReponses<string>) => (input$: Observable<object>) =>
-      getResponses(input$.pipe(map((request) => JSON.stringify(request)))).pipe(
-        map((response) => JSON.parse(response)),
-      ),
+    map(
+      (getResponses: GetWebSocketReponses<string>) => (input$: Observable<object>) =>
+        getResponses(input$.pipe(map((request) => JSON.stringify(request)))).pipe(
+          map((response) => JSON.parse(response)),
+        ),
     ),
   )
 }

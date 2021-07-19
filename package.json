@@ -1,7 +1,7 @@
 {
   "name": "rxjs-websockets",
-  "version": "8.0.1",
-  "description": "rxjs 6 websockets library",
+  "version": "9.0.0",
+  "description": "rxjs 7 websockets library",
   "author": "insidewhy <github@chilon.net>",
   "license": "ISC",
   "repository": {
@@ -42,21 +42,21 @@
     "jest-watch": "yarn jest --watch"
   },
   "peerDependencies": {
-    "rxjs": "^6.1.0"
+    "rxjs": "^7.0.0"
   },
   "devDependencies": {
-    "@types/jest": "25.2.1",
-    "@typescript-eslint/eslint-plugin": "2.34.0",
-    "@typescript-eslint/parser": "2.34.0",
-    "concurrently": "5.1.0",
-    "eslint": "6.8.0",
-    "eslint-config-prettier": "6.12.0",
-    "husky": "4.2.5",
-    "jest": "27.0.4",
-    "prettier": "2.0.4",
-    "pretty-quick": "3.0.2",
+    "@types/jest": "26.0.24",
+    "@typescript-eslint/eslint-plugin": "4.28.3",
+    "@typescript-eslint/parser": "4.28.3",
+    "concurrently": "6.2.0",
+    "eslint": "7.31.0",
+    "eslint-config-prettier": "8.3.0",
+    "husky": "7.0.1",
+    "jest": "27.0.6",
+    "prettier": "2.3.2",
+    "pretty-quick": "3.1.1",
     "rimraf": "3.0.2",
-    "rxjs": "6.6.3",
-    "typescript": "4.0.3"
+    "rxjs": "^7.2.0",
+    "typescript": "4.3.5"
   }
 }

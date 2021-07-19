@@ -1,5 +1,7 @@
 # Changelog
 
+- 2021/07/19 - 9.0.0
+  - Support rxjs 7
 - 2020/03/20 - 8.0.1
   - Ensure `close` is called even when the `open` event is not received.
 - 2019/09/22 - 8.0.0
