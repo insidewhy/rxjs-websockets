@@ -67,13 +67,13 @@ const messages$: Observable<WebSocketPayload> = socket$.pipe(
   share(),
 )
 
-const messagesSubscription: Subscription = messages.subscribe(
-  (message: string) => {
+const messagesSubscription: Subscription = messages.subscribe({
+  next: (message: string) => {
     console.log('received message:', message)
     // respond to server
     input$.next('i got your message')
   },
-  (error: Error) => {
+  error: (error: Error) => {
     const { message } = error
     if (message === normalClosureMessage) {
       console.log('server closed the websocket connection normally')
@@ -81,13 +81,13 @@ const messagesSubscription: Subscription = messages.subscribe(
       console.log('socket was disconnected due to error:', message)
     }
   },
-  () => {
+  complete: () => {
     // The clean termination only happens in response to the last
     // subscription to the observable being unsubscribed, any
     // other closure is considered an error.
     console.log('the connection was closed in response to the user')
   },
-)
+})
 
 function closeWebsocket() {
   // this also caused the websocket connection to be closed
