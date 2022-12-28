@@ -155,7 +155,7 @@ This example shows how to use the `map` operator to handle JSON encoding of outg
 
 ```typescript
 import { Observable } from 'rxjs'
-import makeWebSocketObservable, { WebSocketOptions } from 'rxjs-websockets'
+import makeWebSocketObservable, { WebSocketOptions, GetWebSocketResponses } from 'rxjs-websockets'
 
 function makeJsonWebSocketObservable(
   url: string,
@@ -164,7 +164,7 @@ function makeJsonWebSocketObservable(
   const socket$ = makeWebSocketObservable<string>(url, options)
   return socket$.pipe(
     map(
-      (getResponses: GetWebSocketReponses<string>) => (input$: Observable<object>) =>
+      (getResponses: GetWebSocketResponses<string>) => (input$: Observable<object>) =>
         getResponses(input$.pipe(map((request) => JSON.stringify(request)))).pipe(
           map((response) => JSON.parse(response)),
         ),
