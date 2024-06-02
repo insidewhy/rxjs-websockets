@@ -5,7 +5,6 @@ import { delay, catchError, switchMap } from 'rxjs/operators'
 import connect, { normalClosureMessage, WebSocketLike } from '.'
 
 describe('rxjs-websockets', () => {
-  /* eslint-disable @typescript-eslint/no-empty-function */
   let scheduler: TestScheduler
   let expect$: typeof scheduler.expectObservable
   let flush: typeof scheduler.flush
@@ -22,10 +21,12 @@ describe('rxjs-websockets', () => {
   })
 
   class MockSocket {
-    onmessage = (event: any) => {}
-    onopen = (event: any) => {}
-    onclose = (event: any) => {}
-    onerror = (event: any) => {}
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    onmessage = (_event: unknown) => {}
+    onopen = (_event: unknown) => {}
+    onclose = (_event: unknown) => {}
+    onerror = (_event: unknown) => {}
+    /* eslint-enable @typescript-eslint/no-unused-vars */
     close = jest.fn()
     // forwards input as output
     send(data: string) {
@@ -87,7 +88,7 @@ describe('rxjs-websockets', () => {
         socket.pipe(
           switchMap((factory) => factory(cold('a'))),
           // rethrow error as string... can't get expectation to match the error
-          catchError((error) => throwError(error.message)),
+          catchError((error) => throwError(() => error.message)),
         ),
       ).toBe('-a-#', undefined, expectedReason)
       flush()

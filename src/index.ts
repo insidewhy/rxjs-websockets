@@ -12,6 +12,7 @@ interface EventWithMessage {
 type WebSocketPayload = string | ArrayBuffer | Blob
 
 export interface WebSocketLike {
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   close(): any
   send(data: WebSocketPayload): any
 
@@ -22,6 +23,7 @@ export interface WebSocketLike {
   onclose: ((event: any) => any) | null
   onmessage: ((event: any) => any) | null
   onerror: ((event: any) => any) | null
+  /* eslint-enable  @typescript-eslint/no-explicit-any */
 }
 
 export type WebSocketFactory = (url: string, protocols: string | string[]) => WebSocketLike
