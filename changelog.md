@@ -15,9 +15,9 @@
 - 2019/01/14 - 7.0.0-beta.2
   - Allow configuration arguments to be left out when defaults are desired.
 - 2019/01/09 - 7.0.0-beta.1
-  - Connection status handling is much simpler, everything can be done with a single observable.
-  - Configuration parameters taken as an object instead of arguments, more future proof and self-documenting.
-  - Improved documentation.
+  - Simplify connection status handling, everything can be done with a single observable.
+  - Take configuration parameters as an object instead of arguments, more future proof and self-documenting.
+  - Improve documentation.
   - Provide reliable way to detect normal WebSocket closures.
 - 2019/01/07 -7.0.0-alpha.1
   - Support binary requests/responses.
