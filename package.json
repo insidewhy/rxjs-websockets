@@ -21,6 +21,10 @@
   ],
   "main": "dist.es5/index.js",
   "module": "dist.es5m/index.js",
+  "exports": {
+    "import": "./dist.es5m/index.js",
+    "require": "./dist.es5/index.js"
+  },
   "es2015": "dist.es2015/index.js",
   "typings": "dist.es2015/index",
   "sideEffects": false,
@@ -29,7 +33,7 @@
     "build": "yarn build-modern && yarn build-es5 && yarn build-es5m",
     "build-modern": "tsc -p src",
     "build-es5": "tsc -p src --target es5 --outDir dist.es5",
-    "build-es5m": "yarn build-es5 -m es2015 --outDir dist.es5m",
+    "build-es5m": "yarn build-es5 -m es2015 --outDir dist.es5m && echo '{\"type\":\"module\"}' > dist.es5m/package.json",
     "build-watch": "yarn build-es5 -w",
     "clean": "rimraf 'dist*'",
     "lint": "eslint 'src/*.ts'",
