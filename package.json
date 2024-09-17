@@ -60,7 +60,7 @@
     "typescript-eslint": "^7.10.0"
   },
   "volta": {
-    "node": "22.2.0",
+    "node": "22.9.0",
     "yarn": "1.22.22"
   }
 }
