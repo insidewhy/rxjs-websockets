@@ -57,7 +57,7 @@
     "rimraf": "5.0.7",
     "rxjs": "7.8.1",
     "typescript": "5.4.5",
-    "typescript-eslint": "^7.10.0"
+    "typescript-eslint": "^8.0.0"
   },
   "volta": {
     "node": "22.2.0",
